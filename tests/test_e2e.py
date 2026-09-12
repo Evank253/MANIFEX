@@ -36,13 +36,16 @@ def test_constitution_modification_denies():
 
 
 def test_self_verification_denies():
-    r = ManifexRuntime(); a = make_auth(); r.register_authorization(a); l = CapabilityLease('l3', 'a1', 'agent-1', frozenset({'build'}), a.issued_at, a.expires_at); r.issue_lease('a1', l)
+    r = ManifexRuntime(); a = make_auth(); r.register_authorization(a); l = CapabilityLease('l3', 'a1', 'agent-1', frozenset({'build'}), a.issued_at, a.expires_at)
+    r.issue_lease('a1', l)
     d = r.decide(OperationRequest('q4', 'agent-1', 'build', 'test', frozenset({'build'})), 'a1', 'l3', verifier='agent-1')
     assert d.decision == Decision.DENY
 
 
-def test_audit_chain_integrity():
-    r = ManifexRuntime(); r.decide(OperationRequest('q5', 'agent-1', 'build', 'test', frozenset({'build'}))); assert r.audit.verify_chain()
+def test_audit_chain_integrity_and_monotonic_time():
+    r = ManifexRuntime(); r.decide(OperationRequest('q5', 'agent-1', 'build', 'test', frozenset({'build'})))
+    assert r.audit.verify_chain()
+    assert r.audit.events[-1].monotonic_timestamp_ns > 0
 
 
 def test_human_emergency_stop():
