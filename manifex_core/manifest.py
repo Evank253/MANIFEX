@@ -15,7 +15,7 @@ class LLMManifest:
     version: str
     allowed_actions: FrozenSet[str] = frozenset()
     allowed_capabilities: FrozenSet[str] = frozenset()
-    environment: str = "sandbox"
+    environment: str = 'sandbox'
 
 
 @dataclass
@@ -32,6 +32,11 @@ class ManifestExecutor:
         action: str,
         purpose: str,
         capabilities: FrozenSet[str],
+        authorization_id: str | None = None,
+        lease_id: str | None = None,
+        resources: FrozenSet[str] = frozenset(),
+        network_scope: FrozenSet[str] = frozenset(),
+        verifier: str | None = None,
         execute: Callable[[], object] | None = None,
     ) -> tuple[Decision, object | None]:
         if action not in self.manifest.allowed_actions:
@@ -40,14 +45,20 @@ class ManifestExecutor:
             return Decision.DENY, None
         if not self.containment.allow_capabilities(capabilities):
             return Decision.DENY, None
+        if not self.containment.allow_network(network_scope):
+            return Decision.DENY, None
+        if not self.containment.allow_filesystem(resources):
+            return Decision.DENY, None
         request = OperationRequest(
-            request_id=f"manifest:{self.manifest.manifest_id}",
+            request_id=f'manifest:{self.manifest.manifest_id}',
             actor=actor,
             action=action,
             purpose=purpose,
             requested_capabilities=capabilities,
+            resources=resources,
+            network_scope=network_scope,
         )
-        decision = self.runtime.decide(request)
+        decision = self.runtime.decide(request, authorization_id, lease_id, verifier)
         if decision.decision != Decision.ALLOW:
             return decision.decision, None
         return Decision.ALLOW, execute() if execute else None
