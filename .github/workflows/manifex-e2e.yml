@@ -18,3 +18,5 @@ jobs:
         run: python -m tests.test_e2e
       - name: Run containment and gate tests
         run: python -m tests.test_containment
+      - name: Run combined composition security suite
+        run: python -m tests.test_composition_security
