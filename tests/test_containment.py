@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from manifex_core.containment import Boundary, ContainmentEnforcer
 from manifex_core.gate import EngineeringGate, GateStatus, REQUIRED_GATES
+from manifex_core.identity import ExecutionIdentity
 from manifex_core.manifest import LLMManifest, ManifestExecutor
 from manifex_core.models import Authorization, CapabilityLease, Decision, now
 from manifex_core.runtime import ManifexRuntime
@@ -71,6 +72,7 @@ def test_manifest_requires_authorized_lease():
     executor = ManifestExecutor(
         runtime,
         LLMManifest('m2', 'llm', '1', allowed_actions=frozenset({'build'}), allowed_capabilities=frozenset({'build'})),
+        identity=ExecutionIdentity('agent-1', 'm2', 'sandbox', 'session-1'),
     )
     decision, result = executor.request(
         'agent-1', 'build', 'manifest-test', frozenset({'build'}),
@@ -87,8 +89,19 @@ def test_manifest_never_executes_after_containment_failure():
         ManifexRuntime(),
         LLMManifest('m3', 'llm', '1', allowed_actions=frozenset({'build'}), allowed_capabilities=frozenset({'build'})),
         containment=containment,
+        identity=ExecutionIdentity('agent-1', 'm3', 'sandbox', 'session-1'),
     )
     decision, result = executor.request('agent-1', 'build', 'test', frozenset({'build'}), execute=lambda: 'must-not-run')
+    assert decision == Decision.DENY and result is None
+
+
+def test_manifest_rejects_wrong_identity():
+    executor = ManifestExecutor(
+        ManifexRuntime(),
+        LLMManifest('m4', 'llm', '1', allowed_actions=frozenset({'build'}), allowed_capabilities=frozenset({'build'})),
+        identity=ExecutionIdentity('other-agent', 'm4', 'sandbox', 'session-1'),
+    )
+    decision, result = executor.request('agent-1', 'build', 'identity mismatch', frozenset({'build'}))
     assert decision == Decision.DENY and result is None
 
 
