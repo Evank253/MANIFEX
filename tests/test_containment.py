@@ -1,7 +1,9 @@
+from datetime import timedelta
+
 from manifex_core.containment import Boundary, ContainmentEnforcer
 from manifex_core.gate import EngineeringGate, GateStatus, REQUIRED_GATES
 from manifex_core.manifest import LLMManifest, ManifestExecutor
-from manifex_core.models import Decision
+from manifex_core.models import Authorization, CapabilityLease, Decision, now
 from manifex_core.runtime import ManifexRuntime
 
 
@@ -50,8 +52,32 @@ def test_manifest_denies_action_outside_manifest():
         ManifexRuntime(),
         LLMManifest('m1', 'llm', '1', allowed_actions=frozenset({'build'}), allowed_capabilities=frozenset({'build'})),
     )
-    decision, result = executor.request('agent-1', 'deploy', 'test', frozenset({'build'}), lambda: 'executed')
+    decision, result = executor.request('agent-1', 'deploy', 'test', frozenset({'build'}), execute=lambda: 'executed')
     assert decision == Decision.DENY and result is None
+
+
+def test_manifest_requires_authorized_lease():
+    runtime = ManifexRuntime()
+    t = now()
+    auth = Authorization(
+        id='auth-manifest', subject='agent-1', issuer='HUMAN', human_authority='human-1',
+        action='build', purpose='manifest-test', capabilities=frozenset({'build'}),
+        issued_at=t - timedelta(seconds=1), expires_at=t + timedelta(seconds=60),
+        approval='human-signature',
+    )
+    runtime.register_authorization(auth)
+    lease = CapabilityLease('lease-manifest', 'auth-manifest', 'agent-1', frozenset({'build'}), auth.issued_at, auth.expires_at)
+    runtime.issue_lease('auth-manifest', lease)
+    executor = ManifestExecutor(
+        runtime,
+        LLMManifest('m2', 'llm', '1', allowed_actions=frozenset({'build'}), allowed_capabilities=frozenset({'build'})),
+    )
+    decision, result = executor.request(
+        'agent-1', 'build', 'manifest-test', frozenset({'build'}),
+        authorization_id='auth-manifest', lease_id='lease-manifest', verifier='verifier',
+        execute=lambda: 'executed',
+    )
+    assert decision == Decision.ALLOW and result == 'executed'
 
 
 def test_manifest_never_executes_after_containment_failure():
@@ -59,10 +85,10 @@ def test_manifest_never_executes_after_containment_failure():
     containment.terminate()
     executor = ManifestExecutor(
         ManifexRuntime(),
-        LLMManifest('m2', 'llm', '1', allowed_actions=frozenset({'build'}), allowed_capabilities=frozenset({'build'})),
+        LLMManifest('m3', 'llm', '1', allowed_actions=frozenset({'build'}), allowed_capabilities=frozenset({'build'})),
         containment=containment,
     )
-    decision, result = executor.request('agent-1', 'build', 'test', frozenset({'build'}), lambda: 'must-not-run')
+    decision, result = executor.request('agent-1', 'build', 'test', frozenset({'build'}), execute=lambda: 'must-not-run')
     assert decision == Decision.DENY and result is None
 
 
