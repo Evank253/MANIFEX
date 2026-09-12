@@ -25,8 +25,7 @@ def test_termination_is_terminal_for_enforcer():
 
 def test_gate_missing_evidence_is_blocked():
     gate = EngineeringGate()
-    status = gate.finalize()
-    assert status == GateStatus.BLOCKED
+    assert gate.finalize() == GateStatus.BLOCKED
 
 
 def test_gate_requires_every_stage():
@@ -65,3 +64,10 @@ def test_manifest_never_executes_after_containment_failure():
     )
     decision, result = executor.request('agent-1', 'build', 'test', frozenset({'build'}), lambda: 'must-not-run')
     assert decision == Decision.DENY and result is None
+
+
+if __name__ == '__main__':
+    tests = [value for name, value in globals().items() if name.startswith('test_')]
+    for test in tests:
+        test()
+    print(f'PASS {len(tests)} containment tests')
