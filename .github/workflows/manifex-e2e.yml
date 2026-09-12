@@ -1,0 +1,18 @@
+name: MANIFEX E2E
+
+on:
+  push:
+    branches: [manifex-genesis-runtime]
+  pull_request:
+    branches: [Python-3]
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run constitutional E2E benchmark
+        run: python tests/test_e2e.py
