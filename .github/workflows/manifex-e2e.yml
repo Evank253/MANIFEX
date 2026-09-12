@@ -17,4 +17,4 @@ jobs:
       - name: Run constitutional E2E benchmark
         run: python -m tests.test_e2e
       - name: Run containment and gate tests
-        run: python -m unittest tests.test_containment
+        run: python -m tests.test_containment
