@@ -15,4 +15,4 @@ jobs:
         with:
           python-version: '3.12'
       - name: Run constitutional E2E benchmark
-        run: python tests/test_e2e.py
+        run: python -m tests.test_e2e
