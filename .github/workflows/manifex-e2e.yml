@@ -1,0 +1,64 @@
+name: MANIFEX E2E
+
+on:
+  push:
+    branches: [manifex-genesis-runtime]
+  pull_request:
+    branches: [Python-3]
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install required sandbox backend
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bubblewrap
+          command -v bwrap
+          bwrap --version
+      - name: Compile all MANIFEX Python sources
+        run: python -m compileall -q manifex_core tests
+      - name: Run constitutional E2E benchmark
+        run: PYTHONPATH=. python -m tests.test_e2e
+      - name: Run containment and engineering gate tests
+        run: PYTHONPATH=. python -m tests.test_containment
+      - name: Run combined composition security suite
+        run: PYTHONPATH=. python -m tests.test_composition_security
+      - name: Verify sandbox execution boundary
+        run: |
+          PYTHONPATH=. python - <<'PY'
+          from pathlib import Path
+          from tempfile import TemporaryDirectory
+          from manifex_core.sandbox import SandboxPolicy, SandboxRunner
+          with TemporaryDirectory(prefix='manifex-ci-') as tmp:
+              root = Path(tmp)
+              result = SandboxRunner(SandboxPolicy(filesystem_root=root, timeout_seconds=10)).run(['sh', '-c', 'printf MANIFEX_SANDBOX_OK'])
+              assert result.returncode == 0, result.stderr
+              assert result.stdout == 'MANIFEX_SANDBOX_OK', result.stdout
+          print('PASS sandbox boundary smoke test')
+          PY
+      - name: Preserve CI evidence
+        if: always()
+        run: |
+          {
+            echo 'MANIFEX E2E evidence'
+            echo "commit=${GITHUB_SHA}"
+            echo "run=${GITHUB_RUN_ID}"
+            echo "workflow=${GITHUB_WORKFLOW}"
+            python --version
+            command -v bwrap || true
+            bwrap --version || true
+          } > manifex-ci-evidence.txt
+      - name: Upload CI evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: manifex-ci-evidence
+          path: manifex-ci-evidence.txt
