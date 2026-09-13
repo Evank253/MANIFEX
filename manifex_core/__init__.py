@@ -10,7 +10,7 @@ from .gate import EngineeringGate, GateStatus, REQUIRED_GATES
 from .build_index import Asset, BuildIndex
 from .discovery import DiscoveryProvider, GitHubDiscoveryProvider, RepositoryInspection, RepositoryInspector, AssetDiscoveryEngine
 from .classifier import Classification, CapabilityClassifier
-from .gap import CapabilityRequirement, Coverage, GapEngine, GapReport
+from .gap import CapabilityRequirement, Coverage, Gap, GapEngine, GapReport, GapType
 from .evaluator import CandidateEvaluator, CandidateScore
 from .acquisition import AcquisitionEngine, AcquisitionPlan
 from .provenance import ProvenanceLedger
@@ -19,15 +19,12 @@ from .verification import VerificationEngine, VerificationResult
 from .pipeline import DiscoveryPipeline
 
 __all__ = [
-    'Authorization', 'CapabilityLease', 'Decision', 'AuditEvent', 'EvidenceRecord',
-    'OperationRequest', 'ConstitutionalEngine', 'AuditLedger', 'ManifexRuntime',
-    'Boundary', 'ContainmentEnforcer', 'ExecutionIdentity', 'SandboxPolicy',
-    'SandboxRunner', 'SandboxUnavailable', 'LLMManifest', 'ManifestExecutor',
-    'EngineeringGate', 'GateStatus', 'REQUIRED_GATES', 'Asset', 'BuildIndex',
-    'DiscoveryProvider', 'GitHubDiscoveryProvider', 'RepositoryInspection',
-    'RepositoryInspector', 'AssetDiscoveryEngine', 'Classification', 'CapabilityClassifier',
-    'CapabilityRequirement', 'Coverage', 'GapEngine', 'GapReport', 'CandidateEvaluator',
-    'CandidateScore', 'AcquisitionEngine', 'AcquisitionPlan', 'ProvenanceLedger',
-    'QualificationDecision', 'QualificationEngine', 'VerificationEngine', 'VerificationResult',
-    'DiscoveryPipeline',
+    'Authorization', 'CapabilityLease', 'Decision', 'AuditEvent', 'EvidenceRecord', 'OperationRequest',
+    'ConstitutionalEngine', 'AuditLedger', 'ManifexRuntime', 'Boundary', 'ContainmentEnforcer',
+    'ExecutionIdentity', 'SandboxPolicy', 'SandboxRunner', 'SandboxUnavailable', 'LLMManifest', 'ManifestExecutor',
+    'EngineeringGate', 'GateStatus', 'REQUIRED_GATES', 'Asset', 'BuildIndex', 'DiscoveryProvider',
+    'GitHubDiscoveryProvider', 'RepositoryInspection', 'RepositoryInspector', 'AssetDiscoveryEngine',
+    'Classification', 'CapabilityClassifier', 'CapabilityRequirement', 'Coverage', 'Gap', 'GapEngine', 'GapReport', 'GapType',
+    'CandidateEvaluator', 'CandidateScore', 'AcquisitionEngine', 'AcquisitionPlan', 'ProvenanceLedger',
+    'QualificationDecision', 'QualificationEngine', 'VerificationEngine', 'VerificationResult', 'DiscoveryPipeline',
 ]
