@@ -1,7 +1,6 @@
 """MANIFEX discovery-to-index orchestration without automatic acquisition."""
 from __future__ import annotations
 
-from dataclasses import asdict
 from typing import Iterable
 
 from .build_index import Asset, BuildIndex
@@ -27,7 +26,7 @@ class DiscoveryPipeline:
                 name=inspection.repository,
                 source_repository=inspection.repository,
                 source_branch=inspection.revision,
-                source_commit=str(candidate.get("pushed_at") or ""),
+                source_commit=inspection.revision,
                 tree_hash=inspection.tree_hash,
                 source_license=inspection.license_name,
                 dependencies=list(inspection.manifests),
