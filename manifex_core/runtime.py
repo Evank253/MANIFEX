@@ -1,6 +1,6 @@
 from __future__ import annotations
-from dataclasses import dataclass, field
-from .models import Authorization, CapabilityLease, OperationRequest, SecurityState, Decision
+from dataclasses import dataclass, field, replace
+from .models import Authorization, CapabilityLease, OperationRequest, SecurityState, Decision, DecisionRecord
 from .engine import ConstitutionalEngine
 from .audit import AuditLedger
 
@@ -41,7 +41,7 @@ class ManifexRuntime:
     def revoke_lease(self, lease_id: str) -> None:
         lease = self.leases.get(lease_id)
         if lease:
-            object.__setattr__(lease, 'revoked', True)
+            self.leases[lease_id] = replace(lease, revoked=True)
         self.state = SecurityState.REVOKED
         self.audit.append(event_id=f'revoke-{lease_id}', event_type='REVOCATION', actor='HUMAN',
                           request_id=None, authorization_id=lease.authorization_id if lease else None,
@@ -57,15 +57,12 @@ class ManifexRuntime:
                               capability_lease_id=lease_id, action=request.action,
                               state_before=self.state.value, state_after=SecurityState.DENIED.value,
                               decision=Decision.DENY.value, result='BLOCKED', reason='runtime_not_operational')
-            from .models import DecisionRecord
             return DecisionRecord(request.request_id, Decision.DENY, 'runtime_not_operational', ('EXEC-001',))
         auth = self.authorizations.get(authorization_id) if authorization_id else None
         lease = self.leases.get(lease_id) if lease_id else None
         if auth and auth.subject != request.actor:
-            from .models import DecisionRecord
             return DecisionRecord(request.request_id, Decision.DENY, 'identity_scope_mismatch', ('AUTH-001',))
         if lease and lease.subject != request.actor:
-            from .models import DecisionRecord
             return DecisionRecord(request.request_id, Decision.DENY, 'lease_subject_mismatch', ('AUTH-001',))
         return self.engine.decide(request, auth, lease, verifier=verifier)
 
