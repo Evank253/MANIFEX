@@ -39,6 +39,19 @@ def test_gate_requires_every_stage():
     assert gate.finalize() == GateStatus.VERIFIED
 
 
+def test_verified_gate_cannot_be_mutated():
+    gate = EngineeringGate()
+    for name in REQUIRED_GATES:
+        gate.record(name, True)
+    assert gate.finalize() == GateStatus.VERIFIED
+    try:
+        gate.record('audit', False)
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError('verified gate accepted mutation')
+
+
 def test_gate_failure_cannot_become_verified():
     gate = EngineeringGate()
     gate.start()
