@@ -35,6 +35,13 @@ def test_constitution_modification_denies():
     assert d.decision == Decision.DENY
 
 
+def test_authorization_action_must_match_request():
+    r = ManifexRuntime(); a = make_auth(); r.register_authorization(a)
+    l = CapabilityLease('l-action', 'a1', 'agent-1', frozenset({'build'}), a.issued_at, a.expires_at); r.issue_lease('a1', l)
+    d = r.decide(OperationRequest('q-action', 'agent-1', 'deploy', 'test', frozenset({'build'})), 'a1', 'l-action', verifier='verifier')
+    assert d.decision == Decision.DENY
+
+
 def test_self_verification_denies():
     r = ManifexRuntime(); a = make_auth(); r.register_authorization(a); l = CapabilityLease('l3', 'a1', 'agent-1', frozenset({'build'}), a.issued_at, a.expires_at)
     r.issue_lease('a1', l)
