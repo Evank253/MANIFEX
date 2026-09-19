@@ -7,6 +7,19 @@ from .identity import ExecutionIdentity
 from .sandbox import SandboxPolicy, SandboxRunner, SandboxUnavailable
 from .manifest import LLMManifest, ManifestExecutor
 from .gate import EngineeringGate, GateStatus, REQUIRED_GATES
+from .intelligence import (
+    BenchmarkResult,
+    CapabilityGenome,
+    CapabilityRegistry,
+    CapabilityRequirement,
+    EvidencePackage,
+    EvidenceReference,
+    IntelligenceProfile,
+    Provenance,
+    QualificationError,
+    QualificationState,
+    build_evidence_package,
+)
 
 __all__ = [
     'Authorization', 'CapabilityLease', 'Decision', 'AuditEvent', 'EvidenceRecord',
@@ -14,4 +27,8 @@ __all__ = [
     'Boundary', 'ContainmentEnforcer', 'ExecutionIdentity', 'SandboxPolicy',
     'SandboxRunner', 'SandboxUnavailable', 'LLMManifest', 'ManifestExecutor',
     'EngineeringGate', 'GateStatus', 'REQUIRED_GATES',
+    'BenchmarkResult', 'CapabilityGenome', 'CapabilityRegistry',
+    'CapabilityRequirement', 'EvidencePackage', 'EvidenceReference',
+    'IntelligenceProfile', 'Provenance', 'QualificationError',
+    'QualificationState', 'build_evidence_package',
 ]
