@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pytest import raises
+from contextlib import contextmanager
 
 from manifex_core.intelligence import (
     BenchmarkResult,
@@ -13,6 +13,15 @@ from manifex_core.intelligence import (
     QualificationState,
     build_evidence_package,
 )
+
+
+@contextmanager
+def raises(expected: type[BaseException]):
+    try:
+        yield
+    except expected:
+        return
+    raise AssertionError(f"expected {expected.__name__}")
 
 
 def make_capability() -> CapabilityGenome:
