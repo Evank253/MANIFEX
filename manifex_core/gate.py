@@ -6,28 +6,28 @@ from typing import Callable
 
 
 class GateStatus(str, Enum):
-    DRAFT = "DRAFT"
-    TESTING = "TESTING"
-    FAILED = "FAILED"
-    BLOCKED = "BLOCKED"
-    VERIFIED = "VERIFIED"
+    DRAFT = 'DRAFT'
+    TESTING = 'TESTING'
+    FAILED = 'FAILED'
+    BLOCKED = 'BLOCKED'
+    VERIFIED = 'VERIFIED'
 
 
 REQUIRED_GATES = (
-    "build",
-    "type_check",
-    "lint",
-    "unit_tests",
-    "integration_tests",
-    "e2e_tests",
-    "security_tests",
-    "constitutional_tests",
-    "deployment_rehearsal",
-    "failure_injection",
-    "performance",
-    "provenance",
-    "audit",
-    "independent_verification",
+    'build',
+    'type_check',
+    'lint',
+    'unit_tests',
+    'integration_tests',
+    'e2e_tests',
+    'security_tests',
+    'constitutional_tests',
+    'deployment_rehearsal',
+    'failure_injection',
+    'performance',
+    'provenance',
+    'audit',
+    'independent_verification',
 )
 
 
@@ -39,11 +39,15 @@ class EngineeringGate:
     status: GateStatus = GateStatus.DRAFT
 
     def start(self) -> None:
+        if self.status is GateStatus.VERIFIED:
+            raise RuntimeError('verified gate cannot be restarted')
         self.status = GateStatus.TESTING
 
     def record(self, name: str, passed: bool | None) -> None:
         if name not in REQUIRED_GATES:
-            raise KeyError(f"unknown gate: {name}")
+            raise KeyError(f'unknown gate: {name}')
+        if self.status is GateStatus.VERIFIED:
+            raise RuntimeError('verified gate is immutable')
         self.results[name] = passed
         if passed is False:
             self.status = GateStatus.FAILED
