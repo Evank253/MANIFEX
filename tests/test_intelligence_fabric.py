@@ -93,8 +93,7 @@ def test_capability_can_follow_complete_qualification_chain():
 
 
 def test_known_vulnerability_blocks_qualification():
-    cap = make_capability()
-    cap = CapabilityGenome(**{**cap.__dict__, 'known_vulnerabilities': ('known vulnerability',)})
+    cap = make_capability().with_vulnerabilities('known vulnerability')
     cap = add_verified_evidence(qualify(cap))
     with raises(QualificationError):
         cap.transition(QualificationState.QUALIFIED)
