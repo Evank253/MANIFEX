@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Iterable, Mapping
@@ -11,17 +11,17 @@ def utc_now() -> datetime:
 
 
 class QualificationState(str, Enum):
-    DISCOVERED = "DISCOVERED"
-    EXTRACTED = "EXTRACTED"
-    REPRODUCED = "REPRODUCED"
-    BENCHMARKED = "BENCHMARKED"
-    SECURITY_TESTED = "SECURITY_TESTED"
-    VERIFIED = "VERIFIED"
-    QUALIFIED = "QUALIFIED"
-    FAILED = "FAILED"
-    BLOCKED = "BLOCKED"
-    NOT_MEASURED = "NOT_MEASURED"
-    QUARANTINED = "QUARANTINED"
+    DISCOVERED = 'DISCOVERED'
+    EXTRACTED = 'EXTRACTED'
+    REPRODUCED = 'REPRODUCED'
+    BENCHMARKED = 'BENCHMARKED'
+    SECURITY_TESTED = 'SECURITY_TESTED'
+    VERIFIED = 'VERIFIED'
+    QUALIFIED = 'QUALIFIED'
+    FAILED = 'FAILED'
+    BLOCKED = 'BLOCKED'
+    NOT_MEASURED = 'NOT_MEASURED'
+    QUARANTINED = 'QUARANTINED'
 
 
 QUALIFICATION_ORDER = {
@@ -69,7 +69,7 @@ class BenchmarkResult:
     independently_verified: bool = False
 
 
-@dataclass
+@dataclass(frozen=True)
 class CapabilityGenome:
     id: str
     name: str
@@ -104,46 +104,104 @@ class CapabilityGenome:
     def can_execute(self) -> bool:
         return self.qualified
 
-    def add_evidence(self, evidence: EvidenceReference) -> None:
-        self.evidence = (*self.evidence, evidence)
+    def with_evidence(self, evidence: EvidenceReference) -> 'CapabilityGenome':
+        return replace(self, evidence=(*self.evidence, evidence))
 
-    def add_benchmark(self, benchmark: BenchmarkResult) -> None:
-        self.benchmarks = (*self.benchmarks, benchmark)
+    def with_benchmark(self, benchmark: BenchmarkResult) -> 'CapabilityGenome':
+        return replace(self, benchmarks=(*self.benchmarks, benchmark))
 
-    def transition(self, target: QualificationState, *, evidence: Iterable[EvidenceReference] = ()) -> None:
+    def with_vulnerabilities(self, *vulnerabilities: str) -> 'CapabilityGenome':
+        return replace(self, known_vulnerabilities=tuple(vulnerabilities))
+
+    def transition(
+        self,
+        target: QualificationState,
+        *,
+        evidence: Iterable[EvidenceReference] = (),
+    ) -> 'CapabilityGenome':
         allowed = {
-            QualificationState.DISCOVERED: {QualificationState.EXTRACTED, QualificationState.BLOCKED, QualificationState.FAILED, QualificationState.NOT_MEASURED, QualificationState.QUARANTINED},
-            QualificationState.EXTRACTED: {QualificationState.REPRODUCED, QualificationState.BLOCKED, QualificationState.FAILED, QualificationState.NOT_MEASURED, QualificationState.QUARANTINED},
-            QualificationState.REPRODUCED: {QualificationState.BENCHMARKED, QualificationState.BLOCKED, QualificationState.FAILED, QualificationState.NOT_MEASURED, QualificationState.QUARANTINED},
-            QualificationState.BENCHMARKED: {QualificationState.SECURITY_TESTED, QualificationState.BLOCKED, QualificationState.FAILED, QualificationState.NOT_MEASURED, QualificationState.QUARANTINED},
-            QualificationState.SECURITY_TESTED: {QualificationState.VERIFIED, QualificationState.BLOCKED, QualificationState.FAILED, QualificationState.NOT_MEASURED, QualificationState.QUARANTINED},
-            QualificationState.VERIFIED: {QualificationState.QUALIFIED, QualificationState.BLOCKED, QualificationState.FAILED, QualificationState.NOT_MEASURED, QualificationState.QUARANTINED},
-            QualificationState.QUALIFIED: {QualificationState.BLOCKED, QualificationState.QUARANTINED},
-            QualificationState.FAILED: {QualificationState.REPRODUCED, QualificationState.BLOCKED, QualificationState.QUARANTINED},
-            QualificationState.BLOCKED: {QualificationState.DISCOVERED, QualificationState.QUARANTINED},
-            QualificationState.NOT_MEASURED: {QualificationState.EXTRACTED, QualificationState.BLOCKED, QualificationState.QUARANTINED},
-            QualificationState.QUARANTINED: {QualificationState.DISCOVERED, QualificationState.BLOCKED},
+            QualificationState.DISCOVERED: {
+                QualificationState.EXTRACTED, QualificationState.BLOCKED,
+                QualificationState.FAILED, QualificationState.NOT_MEASURED,
+                QualificationState.QUARANTINED,
+            },
+            QualificationState.EXTRACTED: {
+                QualificationState.REPRODUCED, QualificationState.BLOCKED,
+                QualificationState.FAILED, QualificationState.NOT_MEASURED,
+                QualificationState.QUARANTINED,
+            },
+            QualificationState.REPRODUCED: {
+                QualificationState.BENCHMARKED, QualificationState.BLOCKED,
+                QualificationState.FAILED, QualificationState.NOT_MEASURED,
+                QualificationState.QUARANTINED,
+            },
+            QualificationState.BENCHMARKED: {
+                QualificationState.SECURITY_TESTED, QualificationState.BLOCKED,
+                QualificationState.FAILED, QualificationState.NOT_MEASURED,
+                QualificationState.QUARANTINED,
+            },
+            QualificationState.SECURITY_TESTED: {
+                QualificationState.VERIFIED, QualificationState.BLOCKED,
+                QualificationState.FAILED, QualificationState.NOT_MEASURED,
+                QualificationState.QUARANTINED,
+            },
+            QualificationState.VERIFIED: {
+                QualificationState.QUALIFIED, QualificationState.BLOCKED,
+                QualificationState.FAILED, QualificationState.NOT_MEASURED,
+                QualificationState.QUARANTINED,
+            },
+            QualificationState.QUALIFIED: {
+                QualificationState.BLOCKED, QualificationState.QUARANTINED,
+            },
+            QualificationState.FAILED: {
+                QualificationState.REPRODUCED, QualificationState.BLOCKED,
+                QualificationState.QUARANTINED,
+            },
+            QualificationState.BLOCKED: {
+                QualificationState.DISCOVERED, QualificationState.QUARANTINED,
+            },
+            QualificationState.NOT_MEASURED: {
+                QualificationState.EXTRACTED, QualificationState.BLOCKED,
+                QualificationState.QUARANTINED,
+            },
+            QualificationState.QUARANTINED: {
+                QualificationState.DISCOVERED, QualificationState.BLOCKED,
+            },
         }
         if target not in allowed[self.qualification]:
             raise QualificationError(
-                f"invalid qualification transition: {self.qualification.value} -> {target.value}"
+                f'invalid qualification transition: {self.qualification.value} -> {target.value}'
             )
+
+        new_evidence = (*self.evidence, *tuple(evidence))
         if target is QualificationState.QUALIFIED:
-            if not self.provenance:
-                raise QualificationError("qualification requires provenance")
-            if not self.evidence:
-                raise QualificationError("qualification requires evidence")
-            if not any(e.independently_verified for e in self.evidence):
-                raise QualificationError("qualification requires independently verified evidence")
-            if not self.benchmarks:
-                raise QualificationError("qualification requires benchmark evidence")
-            if not any(b.reproduced and b.independently_verified for b in self.benchmarks):
-                raise QualificationError("qualification requires reproduced and independently verified benchmark evidence")
-            if self.known_vulnerabilities:
-                raise QualificationError("qualification blocked by known vulnerabilities")
-        self.evidence = (*self.evidence, *tuple(evidence))
-        self.qualification = target
-        self.last_transition_at = utc_now()
+            candidate = replace(self, evidence=new_evidence)
+            if not candidate.provenance:
+                raise QualificationError('qualification requires provenance')
+            if not candidate.evidence:
+                raise QualificationError('qualification requires evidence')
+            if not any(e.independently_verified for e in candidate.evidence):
+                raise QualificationError(
+                    'qualification requires independently verified evidence'
+                )
+            if not candidate.benchmarks:
+                raise QualificationError('qualification requires benchmark evidence')
+            if not any(
+                b.reproduced and b.independently_verified
+                for b in candidate.benchmarks
+            ):
+                raise QualificationError(
+                    'qualification requires reproduced and independently verified benchmark evidence'
+                )
+            if candidate.known_vulnerabilities:
+                raise QualificationError('qualification blocked by known vulnerabilities')
+
+        return replace(
+            self,
+            evidence=new_evidence,
+            qualification=target,
+            last_transition_at=utc_now(),
+        )
 
 
 @dataclass(frozen=True)
@@ -159,7 +217,7 @@ class CapabilityRegistry:
 
     def register(self, capability: CapabilityGenome) -> None:
         if capability.id in self._capabilities:
-            raise ValueError(f"capability already registered: {capability.id}")
+            raise ValueError(f'capability already registered: {capability.id}')
         self._capabilities[capability.id] = capability
 
     def get(self, capability_id: str) -> CapabilityGenome:
