@@ -35,6 +35,13 @@ from .education import (
     qualify_mastery,
 )
 
+from .mastery import (
+    EducationalMasteryEngine,
+    MasteryAssessment,
+    MasteryDimension,
+    MasteryObservation,
+)
+
 from .intelligence import (
     BenchmarkResult,
     CapabilityGenome,
@@ -59,6 +66,7 @@ __all__ = [
     'CapabilityRequirement', 'EvidencePackage', 'EvidenceReference',
     'IntelligenceProfile', 'Provenance', 'QualificationError',
     'QualificationState', 'build_evidence_package',
+    'EducationalMasteryEngine', 'MasteryAssessment', 'MasteryDimension', 'MasteryObservation',
     'Assessment', 'Competency', 'Concept', 'Curriculum', 'Discipline', 'Domain',
     'EducationalBenchmark', 'EducationalEvidence', 'EducationalGraph',
     'EducationalQualification', 'EducationalSystem', 'EducationLevel',
