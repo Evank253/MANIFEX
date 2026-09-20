@@ -7,6 +7,34 @@ from .identity import ExecutionIdentity
 from .sandbox import SandboxPolicy, SandboxRunner, SandboxUnavailable
 from .manifest import LLMManifest, ManifestExecutor
 from .gate import EngineeringGate, GateStatus, REQUIRED_GATES
+from .education import (
+    Assessment,
+    Competency,
+    Concept,
+    Curriculum,
+    Discipline,
+    Domain,
+    EducationalBenchmark,
+    EducationalEvidence,
+    EducationalGraph,
+    EducationalQualification,
+    EducationalSystem,
+    EducationLevel,
+    InstitutionType,
+    LearningObjective,
+    LearningPath,
+    MasteryError,
+    MasteryLevel,
+    MasteryProfile,
+    MasteryRecord,
+    Misconception,
+    Pedagogy,
+    Prerequisite,
+    Skill,
+    TeachingStrategy,
+    qualify_mastery,
+)
+
 from .intelligence import (
     BenchmarkResult,
     CapabilityGenome,
@@ -31,4 +59,10 @@ __all__ = [
     'CapabilityRequirement', 'EvidencePackage', 'EvidenceReference',
     'IntelligenceProfile', 'Provenance', 'QualificationError',
     'QualificationState', 'build_evidence_package',
+    'Assessment', 'Competency', 'Concept', 'Curriculum', 'Discipline', 'Domain',
+    'EducationalBenchmark', 'EducationalEvidence', 'EducationalGraph',
+    'EducationalQualification', 'EducationalSystem', 'EducationLevel',
+    'InstitutionType', 'LearningObjective', 'LearningPath', 'MasteryError',
+    'MasteryLevel', 'MasteryProfile', 'MasteryRecord', 'Misconception', 'Pedagogy',
+    'Prerequisite', 'Skill', 'TeachingStrategy', 'qualify_mastery',
 ]
