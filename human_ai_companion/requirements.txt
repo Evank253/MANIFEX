@@ -1,0 +1,2 @@
+# Core contracts intentionally use Python standard library only.
+# Runtime integration dependencies will be added only when the MANIFEX host contracts are bound.

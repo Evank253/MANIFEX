@@ -1,0 +1,31 @@
+from dataclasses import dataclass
+from datetime import datetime, timezone
+
+from .models import ConsentGrant, Disclosure, RecordKind, World
+
+
+@dataclass(frozen=True)
+class PrivacyPolicy:
+    """Standalone Companion privacy policy: cross-world disclosure is denied by default."""
+
+    def can_disclose(self, record_world: World, target_world: World, kind: RecordKind, consent: ConsentGrant | None, now: datetime | None = None) -> bool:
+        if record_world == target_world:
+            return True
+        if consent is None or consent.revoked:
+            return False
+        if consent.from_world != record_world or consent.to_world != target_world:
+            return False
+        if kind not in consent.allowed_record_kinds:
+            return False
+        if consent.expires_at:
+            expiry = datetime.fromisoformat(consent.expires_at.replace('Z', '+00:00'))
+            if expiry <= (now or datetime.now(timezone.utc)):
+                return False
+        return True
+
+    def authorize_disclosure(self, disclosure: Disclosure, records: list[tuple[World, RecordKind]], consent: ConsentGrant) -> None:
+        if disclosure.consent_id != consent.consent_id or consent.subject_id != disclosure.subject_id:
+            raise PermissionError('disclosure is not bound to the supplied consent')
+        for world, kind in records:
+            if not self.can_disclose(world, World.PROFESSIONAL, kind, consent):
+                raise PermissionError(f'professional disclosure denied for {world.value}/{kind.value}')
