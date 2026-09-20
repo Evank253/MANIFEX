@@ -74,3 +74,16 @@ __all__ = [
     'MasteryLevel', 'MasteryProfile', 'MasteryRecord', 'Misconception', 'Pedagogy',
     'Prerequisite', 'Skill', 'TeachingStrategy', 'qualify_mastery',
 ]
+
+from .academic_contract import (
+    AppendOnlyHistory, AssessmentResult, AssessmentSpecification, Benchmark,
+    CanonicalReference, ContractError, HistoricalLineage, Qualification,
+    QualificationStatus, CapabilityAvailability, RoutingEligibility,
+    MasteryAssessment as AcademicMasteryAssessment,
+    MasteryRecord as AcademicMasteryRecord,
+    recompute_qualification, validate_lineage, canonical_hash,
+)
+
+__all__ += [
+    'AppendOnlyHistory', 'AssessmentResult', 'AssessmentSpecification', 'Benchmark', 'CanonicalReference', 'ContractError', 'HistoricalLineage', 'Qualification', 'QualificationStatus', 'CapabilityAvailability', 'RoutingEligibility', 'AcademicMasteryAssessment', 'AcademicMasteryRecord', 'recompute_qualification', 'validate_lineage', 'canonical_hash',
+]
