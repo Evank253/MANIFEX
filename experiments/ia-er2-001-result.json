@@ -1,0 +1,29 @@
+{
+  "assessment_id": "IA-ER2-001",
+  "classification": "INDEPENDENT_ADVERSARIAL_ASSESSMENT",
+  "target_branch": "er-v2",
+  "target_commit": "b36d3bc87f36fb308e179bb83824bf2da9707bdd",
+  "execution_mode": "source-derived independent harness",
+  "exact_checkout": false,
+  "qualification": "NOT_QUALIFIED",
+  "authorization": "NOT_REQUESTED",
+  "results": [
+    {"id":"IA-01","result":"PASS","outcome":"REJECTED","detail":"missing required fields"},
+    {"id":"IA-02","result":"PASS","outcome":"REJECTED","detail":"missing required fields"},
+    {"id":"IA-03","result":"PASS","outcome":"REJECTED","detail":"missing required fields"},
+    {"id":"IA-04","result":"PASS","outcome":"REJECTED","detail":"request hash does not match request payload"},
+    {"id":"IA-05","result":"PASS","outcome":"REJECTED","detail":"result hash does not match result payload"},
+    {"id":"IA-06","result":"PASS","outcome":"ACCEPTED","detail":"persisted object self-rehash matched"},
+    {"id":"IA-07","result":"PASS","outcome":"REJECTED","detail":"persisted evidence hash mismatch detected"},
+    {"id":"IA-08","result":"PASS","outcome":"REJECTED","detail":"registration cannot carry qualification"},
+    {"id":"IA-09","result":"PASS","outcome":"REJECTED","detail":"authority decision must be false"},
+    {"id":"IA-10","result":"PASS","outcome":"REJECTED","detail":"duplicate execution identity rejected"},
+    {"id":"IA-11","result":"FAIL","outcome":"ACCEPTED","detail":"semantic identity deception accepted when request_payload.request_id was changed and request_hash/evidence_hash recomputed while top-level request_id remained unchanged"}
+  ],
+  "summary": {
+    "passed": 10,
+    "failed": 1,
+    "errors": 0
+  },
+  "conclusion": "ER-v2 fixes the Experiment 001 hash-binding and persistence-projection defect class, but the independent adversarial assessment found a new semantic-binding defect. Cryptographic field integrity is enforced, but cross-field identity consistency is not."
+}
