@@ -14,7 +14,7 @@ The architecture is frozen at this checkpoint. The historical record is **not** 
 - MANIFEX checkpoint reference: `307d15e4746a7fbe3d8d7b937dae0ea1462a3f58`
 - Kronos repository: `Evank253/Kronos-Vibe-Coder`
 - Kronos checkpoint reference: `6bd20041d4ac34e5254f405a0c7d5587ee676bda`
-- Canonical checkpoint manifest hash: `068fc0b6a3944e5e59808f37062dc8d853f28703f65a0161b41444c9c43b390e`
+- Checkpoint manifest hash: **pending canonical computation from the final checkpoint package; no hash is claimed by this record itself.**
 
 ## Architecture State at the Boundary
 
