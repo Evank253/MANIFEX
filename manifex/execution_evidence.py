@@ -21,7 +21,7 @@ REQUIRED = (
     *HASH_FIELDS,
 )
 FIRST_CLASS_FIELDS = (
-    "execution_id", "request_id", "mission_id", "repository", "target_commit",
+    "evidence_id", "execution_id", "request_id", "mission_id", "repository", "target_commit",
     "provider", "provider_run_id", "phase", "command", "status",
     "execution_started", "exit_code", "failure_class", "environment",
     "started_at", "finished_at", "request_hash", "result_hash",
