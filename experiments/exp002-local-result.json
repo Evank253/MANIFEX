@@ -1,0 +1,47 @@
+{
+  "authorization": "NOT_REQUESTED",
+  "experiment_001_failure_modes": {
+    "attack_packet_registered": "FIXED",
+    "omitted_payload_arbitrary_hash_accepted": "FIXED",
+    "persisted_projection_mismatch": "FIXED"
+  },
+  "experiment_id": "EXP-002-ER-V2-ATTACK-REPLAY",
+  "frozen_v1_checkpoint": "e110bcc5ac51068851fcf6d2179928b9aefa0ffd",
+  "note": "Source-equivalent replay of the Experiment 001 attack class. Not a byte-identical rerun of Experiment 001 hashes.",
+  "platform": "Linux-6.12.8+-x86_64-with-glibc2.39",
+  "python": "3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]",
+  "qualification": "NOT_QUALIFIED",
+  "requirements": "ER2-R1 ER2-R2 ER2-R3 ER2-R4 ER2-R5",
+  "results": [
+    {
+      "case": "legitimate packet",
+      "detail": null,
+      "outcome": "ACCEPTED"
+    },
+    {
+      "case": "request payload mutation",
+      "detail": "request hash does not match request payload",
+      "outcome": "REJECTED"
+    },
+    {
+      "case": "omitted payloads + arbitrary hashes + recomputed evidence hash",
+      "detail": "missing required fields: request_payload, result_payload",
+      "outcome": "REJECTED"
+    },
+    {
+      "case": "attack packet registration",
+      "detail": "missing required fields: request_payload, result_payload",
+      "outcome": "REJECTED"
+    },
+    {
+      "case": "persisted projection reproduces evidence hash",
+      "kronos_only_field_persisted": "dropped-by-v1-projection",
+      "outcome": "MATCH",
+      "recomputed_hash": "98234258558614c8c39167de155a743d77f2733439035e19f4351316c80c2dc5",
+      "stored_evidence_hash": "98234258558614c8c39167de155a743d77f2733439035e19f4351316c80c2dc5",
+      "verify": "PASS"
+    }
+  ],
+  "schema": "manifex-execution-evidence/v2",
+  "status": "LOCAL EXECUTION / NOT QUALIFICATION"
+}
