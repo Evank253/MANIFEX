@@ -2,61 +2,61 @@
 
 **Assessment ID:** `IA-ER2-001`  
 **Target:** `er-v2` at `b36d3bc87f36fb308e179bb83824bf2da9707bdd`  
-**Classification:** INDEPENDENT ADVERSARIAL ASSESSMENT  
+**Classification:** INDEPENDENT ADVERSARIAL SOURCE ANALYSIS  
 **Qualification:** NOT_QUALIFIED  
 **Authorization:** NOT_REQUESTED
 
-## Independence and execution boundary
+## Execution boundary
 
-The assessment was performed as a separate adversarial procedure against the recorded v2 receiver logic retrieved from GitHub. The evaluator did not use the v2 acceptance suite as the decision mechanism.
-
-The execution used a source-derived independent harness rather than an exact repository checkout. Therefore this is **not exact commit-bound runtime evidence**. It is an independent adversarial assessment of the recorded implementation logic.
+This record is an independent adversarial **source analysis**, not a runtime execution result. The evaluator retrieved the recorded v2 receiver and acceptance tests from GitHub and reasoned against the implementation logic. No claim is made that the attack harness was executed locally, and no exact-checkout runtime evidence is claimed.
 
 The target implementation was not modified by the assessment.
 
-## Results
+## Findings
 
-| ID | Attack | Result |
+IA-01 through IA-10 are statically supported as rejected by the recorded receiver:
+
+| ID | Attack | Static outcome |
 |---|---|---|
-| IA-01 | Remove request payload and forge request hash | PASS — rejected |
-| IA-02 | Remove result payload and forge result hash | PASS — rejected |
-| IA-03 | Remove both payloads and recompute evidence hash | PASS — rejected |
-| IA-04 | Mutate request payload while retaining hash | PASS — rejected |
-| IA-05 | Mutate result payload while retaining hash | PASS — rejected |
-| IA-06 | Recompute persisted evidence from persisted object alone | PASS — exact self-rehash |
-| IA-07 | Drop hash-covered field | PASS — detected |
-| IA-08 | Attempt qualification escalation | PASS — rejected |
-| IA-09 | Attempt authority escalation | PASS — rejected |
-| IA-10 | Re-register duplicate execution identity | PASS — rejected |
-| IA-11 | Surface-valid semantic identity deception | **FAIL — accepted** |
+| IA-01 | Remove request payload and forge request hash | REJECT — required field check |
+| IA-02 | Remove result payload and forge result hash | REJECT — required field check |
+| IA-03 | Remove both payloads and recompute evidence hash | REJECT — required payload checks |
+| IA-04 | Mutate request payload while retaining hash | REJECT — request hash mismatch |
+| IA-05 | Mutate result payload while retaining hash | REJECT — result hash mismatch |
+| IA-06 | Recompute persisted evidence from persisted object alone | PASS — verifier hashes persisted object itself |
+| IA-07 | Drop hash-covered field | DETECT — persisted evidence hash changes |
+| IA-08 | Attempt qualification escalation | REJECT — only NOT_QUALIFIED/NOT_MEASURED accepted |
+| IA-09 | Attempt authority escalation | REJECT — authority request must be false |
+| IA-10 | Re-register duplicate execution identity | REJECT — existing evidence file blocks overwrite |
 
-## IA-11 finding
+These are **source-level conclusions**, not executed test results.
 
-The receiver correctly verifies:
+## IA-11 — new defect
 
-- request payload → request hash
-- result payload → result hash
-- complete evidence object → evidence hash
+A surface-valid semantic identity deception is accepted by the receiver logic.
 
-However, it does not verify semantic identity relationships between the payloads and the surrounding evidence fields.
+Construct an otherwise valid v2 packet and change:
 
-The adversarial case changed:
+`evidence.request_payload.request_id`
 
-`request_payload.request_id = "attacker-request"`
-
-while retaining:
+from `req-1` to another value, while leaving:
 
 `evidence.request_id = "req-1"`
 
-The attacker then recomputed both the request hash and enclosing evidence hash.
+Then recompute:
 
-All cryptographic checks therefore remained valid, and the receiver accepted the packet.
+- `request_hash` from the altered request payload;
+- `evidence_hash` from the altered evidence object.
+
+The receiver's checks all pass because it verifies the request payload against the request hash, but it does **not** verify that the payload's `request_id` agrees with the surrounding evidence's `request_id`.
+
+Therefore the receiver accepts a cryptographically self-consistent packet whose semantic identities disagree.
 
 This demonstrates:
 
 > **Cryptographic integrity of fields is not the same thing as semantic integrity between fields.**
 
-The same class should be tested for at least:
+The same class should be examined for:
 
 - request_id
 - mission_id
@@ -66,9 +66,9 @@ The same class should be tested for at least:
 - command/phase relationships
 - result identity relationships
 
-## Assessment conclusion
+## Conclusion
 
-The Experiment 001 defect class is fixed in the v2 implementation logic:
+The Experiment 001 defect class is addressed by the v2 implementation logic:
 
 - omitted payloads no longer provide binding-free hashes;
 - request/result mutations are detected;
@@ -76,18 +76,16 @@ The Experiment 001 defect class is fixed in the v2 implementation logic:
 - field dropping is detectable;
 - qualification and authority escalation remain blocked.
 
-But ER-v2 is **not yet fully adversarially sound** because IA-11 found a new semantic-binding defect.
+However, the independent source analysis identifies a new semantic-binding defect.
 
-This is therefore **not a qualification pass**.
+**ER-v2 therefore remains NOT_QUALIFIED.**
+
+This assessment must not be represented as runtime execution evidence. A later exact/source-bound adversarial execution should attempt IA-11 and the other attacks before qualification.
 
 ## Required next state
 
 Do not patch the implementation inside this assessment.
 
-Record this failure first.
+First preserve this finding. Then define the next requirement revision for semantic binding, implement it separately, and perform a new independent adversarial assessment.
 
-Then define the next requirement revision specifically for semantic binding, followed by a new implementation and a new independent assessment.
-
-The architecture has therefore produced exactly the kind of result the evidence doctrine requires: the evaluator was able to prove that the current implementation is still wrong in a previously untested dimension.
-
-Raw result: `experiments/ia-er2-001-result.json`.
+Raw analysis result: `experiments/ia-er2-001-result.json`.
