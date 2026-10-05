@@ -4,34 +4,41 @@ import pytest
 
 from manifex.execution_registration import (
     ExecutionRegistrationError,
+    canonical_hash,
     register_execution_evidence,
     validate_packet,
 )
 
 
 def packet():
+    request_payload = {"request_id": "req-1", "mission_id": "mission-1", "command": [sys.executable, "-c", "print('ok')"]}
+    result_payload = {"execution_id": "exec-1", "status": "EXECUTED", "exit_code": 0}
+    evidence = {
+        "evidence_id": "exec-1",
+        "execution_id": "exec-1",
+        "request_id": "req-1",
+        "mission_id": "mission-1",
+        "repository": "example/repo",
+        "target_commit": "abc123",
+        "provider": "local",
+        "phase": "test",
+        "command": [sys.executable, "-c", "print('ok')"],
+        "status": "EXECUTED",
+        "execution_started": True,
+        "qualification_status": "NOT_QUALIFIED",
+        "request_payload": request_payload,
+        "result_payload": result_payload,
+        "request_hash": canonical_hash(request_payload),
+        "result_hash": canonical_hash(result_payload),
+        "evidence_hash": None,
+    }
+    evidence["evidence_hash"] = canonical_hash({k: v for k, v in evidence.items() if k != "evidence_hash"})
     return {
         "schema": "manifex-execution-evidence/v1",
         "source": "Kronos-Vibe-Coder",
         "qualification_requested": False,
         "authority_decision_requested": False,
-        "evidence": {
-            "evidence_id": "exec-1",
-            "execution_id": "exec-1",
-            "request_id": "req-1",
-            "mission_id": "mission-1",
-            "repository": "example/repo",
-            "target_commit": "abc123",
-            "provider": "local",
-            "phase": "test",
-            "command": [sys.executable, "-c", "print('ok')"],
-            "status": "EXECUTED",
-            "execution_started": True,
-            "qualification_status": "NOT_QUALIFIED",
-            "request_hash": "a" * 64,
-            "result_hash": "b" * 64,
-            "evidence_hash": "c" * 64,
-        },
+        "evidence": evidence,
     }
 
 
