@@ -1,0 +1,30 @@
+{
+  "experiment_id": "CDL-001",
+  "source": {
+    "repository": "Evank253/MANIFEX",
+    "commit": "b231f11b85651a230e2c9744f79501b85b54b77a",
+    "tree": "659021a7645e738a5092384e714c3e8e91d691b4"
+  },
+  "experimental_branch": "experiment/capability-discovery-lab-001",
+  "source_protected": true,
+  "initial_components": [
+    "constitutional decision engine",
+    "human authorization",
+    "capability leases",
+    "containment enforcement",
+    "sandbox execution boundary",
+    "append-only audit ledger",
+    "manifest executor",
+    "verification gate",
+    "composition security tests",
+    "end-to-end constitutional tests"
+  ],
+  "status": "INITIAL_AUDIT_COMPLETE",
+  "claims": {
+    "composition_can_create_new_system_level_capabilities": "HYPOTHESIS",
+    "composition_security_is_explicitly_tested": "IMPLEMENTED",
+    "authority_is_non_transitive": "IMPLEMENTED",
+    "full_recursive_capability_discovery": "NOT_MEASURED",
+    "production_qualification": "NOT_MEASURED"
+  }
+}
