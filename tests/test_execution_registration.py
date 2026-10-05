@@ -34,7 +34,7 @@ def packet():
     }
     evidence["evidence_hash"] = canonical_hash({k: v for k, v in evidence.items() if k != "evidence_hash"})
     return {
-        "schema": "manifex-execution-evidence/v1",
+        "schema": "manifex-execution-evidence/v2",
         "source": "Kronos-Vibe-Coder",
         "qualification_requested": False,
         "authority_decision_requested": False,
