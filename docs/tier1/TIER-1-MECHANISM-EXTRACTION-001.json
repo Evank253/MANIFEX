@@ -1,0 +1,152 @@
+{
+  "artifact": "TIER-1-MECHANISM-EXTRACTION-001",
+  "manifest": "TIER-1-RECONSTRUCTION-MANIFEST-001",
+  "status": "INITIAL_MECHANISM_EXTRACTION",
+  "important_boundary": "This artifact records extracted mechanisms from frozen external revisions. It does not establish native reconstruction, implementation, execution, verification, qualification, or authority.",
+  "records": [
+    {
+      "source_id": "T1-SRC-001",
+      "mechanism_extraction_status": "INITIAL_EVIDENCE_BACKED",
+      "mechanism": "Contextual rule evaluation over agent traces/tool calls, including ordered relationships between events; guardrails can intercept requests through proxy/gateway layers.",
+      "source_components": "UNRESOLVED_AT_PATH_LEVEL",
+      "relevant_behavior": [
+        "trajectory/event matching",
+        "policy/rule evaluation",
+        "pre/post request interception"
+      ],
+      "native_reconstruction_target": "CEI-001",
+      "baseline_delta": "MANIFEX requires explicit immutable trajectory identity, authority snapshot, deterministic replay, and resistance to caller-forged verification/approval; exact delta requires source-level extraction."
+    },
+    {
+      "source_id": "T1-SRC-002",
+      "mechanism_extraction_status": "INITIAL_EVIDENCE_BACKED",
+      "mechanism": "Composable benchmark environment separating attacks, defenses, agents/pipelines, task suites, tool/function runtime, and result collection; supports multi-step user/injection tasks.",
+      "source_components": [
+        "src/agentdojo/attacks/",
+        "src/agentdojo/task_suite/",
+        "src/agentdojo/functions_runtime.py",
+        "src/agentdojo/benchmark.py"
+      ],
+      "relevant_behavior": [
+        "attack/defense separation",
+        "task/injection-task modeling",
+        "tool execution runtime",
+        "benchmark/result collection"
+      ],
+      "native_reconstruction_target": "AAL-001 / CEI-001",
+      "baseline_delta": "MANIFEX/AAL must preserve full trajectories and evidence integrity and add architectural forgery/authority-boundary attacks."
+    },
+    {
+      "source_id": "T1-SRC-003",
+      "mechanism_extraction_status": "INITIAL_EVIDENCE_BACKED",
+      "mechanism": "Signed supply-chain layout defines authorized functionaries, ordered steps, artifact rules and inspections; signed link metadata records execution materials/products; verification checks signatures, authorization, commands, artifact rules and inspections.",
+      "source_components": "UNRESOLVED_AT_PATH_LEVEL",
+      "relevant_behavior": [
+        "layout policy",
+        "functionary authorization",
+        "link metadata",
+        "artifact rules",
+        "verification"
+      ],
+      "native_reconstruction_target": "PROV-001",
+      "baseline_delta": "Native provenance must connect exact MANIFEX source/transformation/execution/product identities and independently derive verification rather than trust a caller flag."
+    },
+    {
+      "source_id": "T1-SRC-004",
+      "mechanism_extraction_status": "INITIAL_EVIDENCE_BACKED",
+      "mechanism": "Build provenance model records how an artifact was produced, with buildDefinition and runDetails; SLSA Build levels progressively strengthen provenance generation, signing/authenticity, and build isolation/hardening.",
+      "source_components": [
+        "spec/build-provenance.md",
+        "spec/build-track-basics.md",
+        "spec/distributing-provenance.md"
+      ],
+      "relevant_behavior": [
+        "build provenance",
+        "builder identity",
+        "resolved dependencies",
+        "attestation distribution",
+        "security levels"
+      ],
+      "native_reconstruction_target": "PROV-001",
+      "baseline_delta": "MANIFEX must map provenance to capability transformations and E0-E5 evidence without equating a SLSA level to KSI qualification or authority."
+    },
+    {
+      "source_id": "T1-SRC-005",
+      "mechanism_extraction_status": "INITIAL_EVIDENCE_BACKED",
+      "mechanism": "Artifact signing and verification with signatures/certificates, identity constraints and transparency-log evidence; bundles can carry signature, certificate and transparency proof for offline verification.",
+      "source_components": "UNRESOLVED_AT_PATH_LEVEL",
+      "relevant_behavior": [
+        "artifact signing",
+        "signature verification",
+        "identity verification",
+        "bundle verification",
+        "transparency evidence"
+      ],
+      "native_reconstruction_target": "PROV-001",
+      "baseline_delta": "Native verifier must bind the verified artifact digest to the attestation/provenance and reject mismatched or caller-asserted verification state."
+    },
+    {
+      "source_id": "T1-SRC-006",
+      "mechanism_extraction_status": "INITIAL_EVIDENCE_BACKED",
+      "mechanism": "Analyzable policy-based authorization engine intended to evaluate a request against policies and contextual attributes; Cedar is an authorization mechanism, not the source of KSI constitutional authority.",
+      "source_components": "UNRESOLVED_AT_PATH_LEVEL",
+      "relevant_behavior": [
+        "policy evaluation",
+        "request/context evaluation",
+        "policy analysis"
+      ],
+      "native_reconstruction_target": "AUTH-001",
+      "baseline_delta": "KSI remains authoritative source of delegation; Cedar-style evaluation may decide policy applicability but cannot manufacture H0-H3 delegation or human approval."
+    },
+    {
+      "source_id": "T1-SRC-007",
+      "mechanism_extraction_status": "INITIAL_EVIDENCE_BACKED",
+      "mechanism": "Adversarial AI testing framework organized around attacks/attack strategies, targets, converters, scorers, scenarios/scanners, memory/results and composable execution; supports multi-turn and multimodal adversarial testing.",
+      "source_components": "UNRESOLVED_AT_PATH_LEVEL",
+      "relevant_behavior": [
+        "attack execution",
+        "target interaction",
+        "input conversion",
+        "scoring",
+        "scenario/scanner orchestration",
+        "result persistence"
+      ],
+      "native_reconstruction_target": "AAL-001",
+      "baseline_delta": "Native campaign engine must preserve deterministic trajectories, attack provenance, scorer correctness and evidence integrity; attack count alone is insufficient qualification."
+    },
+    {
+      "source_id": "T1-SRC-008",
+      "mechanism_extraction_status": "INITIAL_EVIDENCE_BACKED",
+      "mechanism": "Declarative evaluation pipeline with providers/targets, test cases, assertions, scoring functions, thresholds, transforms, repetition/concurrency controls and red-team configuration.",
+      "source_components": [
+        "src/evaluator.ts",
+        "configuration reference / evaluation schema"
+      ],
+      "relevant_behavior": [
+        "test execution",
+        "assertion evaluation",
+        "custom scoring",
+        "repetition/concurrency",
+        "red-team integration"
+      ],
+      "native_reconstruction_target": "AAL-001 / EVAL-001",
+      "baseline_delta": "Native EVAL must separately validate evaluator correctness and target performance and preserve run-level provenance/evidence."
+    },
+    {
+      "source_id": "T1-SRC-009",
+      "mechanism_extraction_status": "INITIAL_EVIDENCE_BACKED",
+      "mechanism": "Task abstraction composes dataset, solver and scorer; solvers can execute simple generation or multi-turn agents/tools; scorers produce scores and metrics; logs support evaluation and rescoring workflows.",
+      "source_components": "UNRESOLVED_AT_PATH_LEVEL",
+      "relevant_behavior": [
+        "Task composition",
+        "dataset/sample mapping",
+        "solver execution",
+        "agent/tool interaction",
+        "scoring",
+        "metrics"
+      ],
+      "native_reconstruction_target": "EVAL-001",
+      "baseline_delta": "Native evaluation substrate should adopt common task/solver/scorer semantics while integrating KCN evaluation, MANIFEX provenance, CEI trajectories and E0-E5 evidence."
+    }
+  ]
+}
