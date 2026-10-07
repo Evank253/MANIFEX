@@ -1,0 +1,284 @@
+{
+  "schema": "MANIFEX-TIER1-DELTA-DECISION-001",
+  "version": "0.1",
+  "status": "CONTROLLED_RECONSTRUCTION_DECISION_BASELINE",
+  "date": "2026-10-06",
+  "parent_artifacts": [
+    "docs/tier1/TIER-1-RECONSTRUCTION-MANIFEST-001",
+    "docs/tier1/TIER-1-SOURCE-INTAKE-001.json",
+    "docs/tier1/TIER-1-MECHANISM-EXTRACTION-001.json",
+    "docs/tier1/TIER-1-BASELINE-COMPARISON-001.json"
+  ],
+  "scope": "Convert the all-repository baseline into explicit reconstruction decisions for CEI-001, PROV-001, AUTH-001, AAL-001, and EVAL-001 without implementing them.",
+  "decision_rules": {
+    "REUSE": "Existing native mechanism can satisfy the specified surface substantially unchanged; integration and verification still required.",
+    "ADAPT": "Existing mechanism is real and materially useful, but its interface, trust model, semantics, or evidence contract must change.",
+    "WRAP": "Existing system remains intact behind a bounded interface; its internal semantics are not promoted to authority/evidence truth.",
+    "BUILD_MISSING": "Required mechanism is not established by inspected repository evidence and must be engineered.",
+    "VERIFY": "Mechanism may already exist, but the blocking work is to establish behavior/trust through reproducible or independent verification.",
+    "INTEGRATE": "Cross-cutting dependency such as EIL is consumed rather than duplicated.",
+    "UNRESOLVED": "Available source evidence is insufficient for a stronger decision."
+  },
+  "decisions": [
+    {
+      "id": "CEI-001",
+      "priority": "P0",
+      "primary_decision": "ADAPT + BUILD_MISSING + VERIFY",
+      "reuse_candidates": [
+        "Global-Intelligence agent execution/capability routing and trajectory-related surfaces",
+        "KCN ecosystem audit/session/tool history surfaces",
+        "MANIFEX execution evidence and immutable/hash-linked evidence substrate",
+        "EIL epistemic transition controls"
+      ],
+      "wrap_candidates": [
+        "KCN/Global-Intelligence execution surfaces"
+      ],
+      "build_missing": [
+        "authoritative trajectory model with ordered immutable events",
+        "contextual sequence policy evaluation",
+        "per-action authority/resource/context snapshot binding",
+        "trajectory hash and deterministic replay contract",
+        "forgery-resistant authorization/verification inputs",
+        "explicit ALLOW/DENY/ESCALATE/NOT_MEASURED decision semantics"
+      ],
+      "verify_targets": [
+        "existing trajectory/event ordering",
+        "stale authority snapshot handling",
+        "caller-forged verified/human_approved rejection",
+        "reordered/replayed sequence handling",
+        "parameter escalation and authority downgrade"
+      ],
+      "dependencies": [
+        "KSI",
+        "EIL",
+        "MANIFEX",
+        "AUTH-001"
+      ],
+      "reason": "Existing execution and audit surfaces are substantial, but no inspected repository establishes the complete contextual execution-integrity contract."
+    },
+    {
+      "id": "PROV-001",
+      "priority": "P0",
+      "primary_decision": "ADAPT + BUILD MISSING + VERIFY",
+      "reuse_candidates": [
+        "MANIFEX BuildIndex",
+        "MANIFEX execution_evidence.py",
+        "MANIFEX append-only evidence ledger",
+        "Global-Intelligence provenance/trust mechanisms",
+        "Quantara research/provenance patterns where domain-appropriate",
+        "External in-toto/SLSA/Sigstore mechanisms as design references"
+      ],
+      "build_missing": [
+        "canonical capability provenance object binding source revision, material hash, transformation, execution, product, evidence and attestation",
+        "independent verifier that derives verification rather than trusting producer fields",
+        "cryptographic attestation/signature binding",
+        "provenance-to-capability-registry linkage",
+        "commit-bound execution/source checkout proof",
+        "independent witness/transparency integration where required"
+      ],
+      "verify_targets": [
+        "MANIFEX hash/persistence invariants",
+        "material-to-product relationship",
+        "attestation/signature verification",
+        "source commit/tree/artifact identity",
+        "independent reproduction"
+      ],
+      "critical_rejection": "Do not reuse producer-authored verified=True from Global-Intelligence or caller-authored verification fields as authoritative state.",
+      "dependencies": [
+        "MANIFEX",
+        "EIL",
+        "Capability Registry",
+        "TEVV"
+      ],
+      "reason": "MANIFEX has the strongest native evidence substrate, but its own frozen ER-v1/v2 records identify exact-source, commit-bound, immutability and independent-verification gaps."
+    },
+    {
+      "id": "AUTH-001",
+      "priority": "P0",
+      "primary_decision": "WRAP + ADAPT + VERIFY",
+      "reuse_candidates": [
+        "KSI constitutional authority model and H0-H3 delegation semantics",
+        "existing governance/policy mechanisms as non-authoritative policy evaluation inputs",
+        "EIL authority/evidence state separation"
+      ],
+      "wrap_candidates": [
+        "Cedar-style analyzable policy engine",
+        "legacy RBAC/policy engines in Global-Intelligence"
+      ],
+      "build_missing": [
+        "authoritative delegation-state interface sourced from KSI",
+        "explicit separation of POLICY_ALLOW from AUTHORITY_CREATED",
+        "delegation expiry/revocation/stale-snapshot semantics",
+        "human-required high-impact action boundary",
+        "anti-forgery authority snapshot validation"
+      ],
+      "verify_targets": [
+        "H0 non-delegability",
+        "H3 cannot exceed delegated scope",
+        "expired/revoked delegation",
+        "forged authority level",
+        "forged human approval",
+        "policy/schema mismatch",
+        "replayed authorization"
+      ],
+      "hard_boundary": "No Tier-1 implementation may modify or infer constitutional authority inside KSI.",
+      "dependencies": [
+        "KSI",
+        "EIL",
+        "CEI",
+        "MANIFEX"
+      ],
+      "reason": "Authority already exists architecturally in KSI. The missing work is a bounded analyzable delegation/authorization implementation that consumes authoritative state without creating authority."
+    },
+    {
+      "id": "AAL-001",
+      "priority": "P1",
+      "primary_decision": "ADAPT + WRAP + BUILD MISSING",
+      "reuse_candidates": [
+        "Global-Intelligence security/adversarial surfaces",
+        "KCN Security Twin/audit infrastructure",
+        "existing KCN cyber-defense repositories",
+        "MANIFEX execution/evidence infrastructure",
+        "external AgentDojo/PyRIT/Promptfoo campaign concepts"
+      ],
+      "wrap_candidates": [
+        "existing agent runtimes and target adapters",
+        "Security Twin as a test environment, not production evidence"
+      ],
+      "build_missing": [
+        "unified campaign model",
+        "architecture-level attack families against CEI/PROV/AUTH/EIL",
+        "trajectory-preserving executor",
+        "evidence-integrity-preserving scorer pipeline",
+        "evaluator/scorer correctness tests",
+        "replayable campaign manifests"
+      ],
+      "priority_attack_set": [
+        "caller-forged verified=true",
+        "caller-forged human_approved=true",
+        "caller-forged authority_level=H2",
+        "caller-forged evidence_level=E3",
+        "caller-forged qualification=QUALIFIED",
+        "trajectory tampering",
+        "provenance substitution/replay",
+        "policy bypass",
+        "H2-to-H0 escalation",
+        "stale/replayed authorization",
+        "cross-capability state mutation"
+      ],
+      "dependencies": [
+        "CEI",
+        "AUTH",
+        "PROV",
+        "EIL",
+        "MANIFEX",
+        "EVAL"
+      ],
+      "reason": "The repository estate already has many security/testing surfaces, but the Tier-1 requirement is an architectural adversarial laboratory that attacks the trust boundaries themselves."
+    },
+    {
+      "id": "EVAL-001",
+      "priority": "P1",
+      "primary_decision": "ADAPT + WRAP + VERIFY",
+      "reuse_candidates": [
+        "KCN evaluation infrastructure",
+        "Global-Intelligence certification/evaluation surfaces",
+        "MANIFEX test/evidence registration",
+        "Promptfoo evaluation concepts",
+        "Inspect task/solver/scorer model"
+      ],
+      "wrap_candidates": [
+        "existing model/agent/tool evaluators",
+        "existing certification engines as evaluation targets, not truth sources"
+      ],
+      "build_missing": [
+        "common evaluation object and execution contract",
+        "evaluator-correctness test suite",
+        "known-good/known-bad/boundary/adversarial/reproduction cases",
+        "native integration of trajectory, provenance and E0-E5 evidence"
+      ],
+      "verify_targets": [
+        "scorer correctness",
+        "metric determinism",
+        "reproduction",
+        "target-vs-evaluator separation",
+        "run provenance",
+        "cross-system evaluation consistency"
+      ],
+      "dependencies": [
+        "KCN",
+        "AAL",
+        "CEI",
+        "PROV",
+        "EIL",
+        "TEVV"
+      ],
+      "reason": "A substantial evaluation ecosystem exists, so a new evaluator should not be built from zero. The missing piece is a common evidence-aware substrate and validated evaluator correctness."
+    }
+  ],
+  "cross_capability_decisions": [
+    {
+      "capability": "EIL",
+      "decision": "INTEGRATE",
+      "reason": "Pre-existing epistemic-integrity dependency; not a Tier-1 reconstruction target."
+    },
+    {
+      "capability": "KSI",
+      "decision": "WRAP/INTEGRATE",
+      "reason": "External/final authority boundary; Tier-1 consumes authoritative state and cannot create constitutional authority."
+    },
+    {
+      "capability": "MANIFEX provenance/evidence",
+      "decision": "ADAPT",
+      "reason": "Strongest existing engineering/evidence substrate; strengthen rather than duplicate."
+    },
+    {
+      "capability": "Global-Intelligence provenance/trust",
+      "decision": "ADAPT/VERIFY",
+      "reason": "Rich predecessor mechanism but producer-asserted trust fields require adversarial treatment."
+    },
+    {
+      "capability": "KCN evaluation",
+      "decision": "ADAPT/VERIFY",
+      "reason": "Existing evaluation infrastructure should become the primary native substrate where its semantics can be demonstrated."
+    },
+    {
+      "capability": "Security Twin",
+      "decision": "WRAP",
+      "reason": "Useful adversarial environment; its logs cannot be promoted to production evidence merely by naming."
+    }
+  ],
+  "non_negotiable_invariants": [
+    "CAPABILITY != EVIDENCE != VERIFICATION != QUALIFICATION != AUTHORITY",
+    "POLICY_ALLOW != AUTHORITY_CREATED",
+    "VERIFIED_FIELD != VERIFIED_FACT",
+    "EXTERNAL_MECHANISM != NATIVE_CAPABILITY",
+    "DISCOVERY != EXECUTION",
+    "EXECUTION != EVIDENCE",
+    "Evidence cannot self-promote to qualification.",
+    "Qualification cannot self-promote to authority.",
+    "Tier-1 capabilities cannot silently mutate another capability's state.",
+    "FAILURE -> EVIDENCE -> FINDING -> ENGINEERING CHANGE -> NEW VERSION -> NEW PROVENANCE -> NEW TEST -> NEW VERIFICATION -> NEW QUALIFICATION"
+  ],
+  "implementation_order_recommendation": [
+    "1. Preserve this decision baseline.",
+    "2. Define shared contracts/interfaces only; do not implement capability logic yet.",
+    "3. Establish provenance/identity primitives required by all downstream work.",
+    "4. Establish AUTH-001 bounded delegation interface against KSI.",
+    "5. Establish CEI-001 against AUTH and EIL.",
+    "6. Establish PROV-001 verification/attestation around MANIFEX evidence.",
+    "7. Establish AAL-001 attack campaign substrate against CEI/AUTH/PROV/EIL.",
+    "8. Establish EVAL-001 common evaluation substrate and evaluator-correctness tests.",
+    "9. Run TEVV and produce E0-E5 evidence packages.",
+    "10. Independent verification before any qualification decision."
+  ],
+  "status_boundaries": {
+    "implementation": "NOT ESTABLISHED BY THIS ARTIFACT",
+    "execution": "NOT ESTABLISHED BY THIS ARTIFACT",
+    "evidence": "This artifact is a design decision record, not execution evidence.",
+    "verification": "NOT ESTABLISHED BY THIS ARTIFACT",
+    "qualification": "NOT ESTABLISHED BY THIS ARTIFACT",
+    "authority": "KSI remains external/final."
+  },
+  "next_operation": "RECONSTRUCTION-PLAN-001: derive exact work packages, interfaces, acceptance tests, dependencies, source reuse locations and evidence requirements from these decisions. No implementation until the plan is recorded."
+}
