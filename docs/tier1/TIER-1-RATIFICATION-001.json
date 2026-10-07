@@ -1,0 +1,36 @@
+{
+  "ratification_id": "TIER-1-RATIFICATION-001",
+  "artifact": "docs/tier1/TIER-1-RECONSTRUCTION-PLAN-001.json",
+  "plan_version": "0.1",
+  "plan_commit": "d610f3b1c6790a770828471a49269963db312601",
+  "decision": "RATIFIED",
+  "scope": {
+    "CEI-001": true,
+    "PROV-001": true,
+    "AUTH-001": true,
+    "AAL-001": true,
+    "EVAL-001": true
+  },
+  "authority": {
+    "ratified_by": "Evan Ketchum",
+    "authority_source": "Human Authority",
+    "machine_authority_created": false
+  },
+  "implementation_status": "NOT_IMPLEMENTED",
+  "verification_status": "NOT_VERIFIED",
+  "qualification_status": "NOT_QUALIFIED",
+  "constraints": [
+    "KSI remains the external/final authority boundary.",
+    "EIL remains an existing epistemic-integrity dependency.",
+    "No caller-provided verified=true may establish verification.",
+    "No caller-provided human_approved=true may establish authorization.",
+    "Capability does not imply evidence.",
+    "Evidence does not imply verification.",
+    "Verification does not imply qualification.",
+    "Qualification does not imply authority.",
+    "Historical evidence must remain distinguishable from current evidence.",
+    "No Tier-1 capability may silently mutate another capability's state."
+  ],
+  "next_gate": "SHARED-CONTRACT-SPECIFICATION-001",
+  "implementation_authorization": "RATIFICATION AUTHORIZES THE PLAN ONLY; IT DOES NOT AUTHORIZE UNPLANNED IMPLEMENTATION OR QUALIFICATION."
+}
