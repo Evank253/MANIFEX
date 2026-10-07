@@ -1,0 +1,530 @@
+{
+  "schema": "MANIFEX-TIER1-RECONSTRUCTION-PLAN-001",
+  "version": "0.1",
+  "status": "FROZEN_PLANNING_BASELINE_PENDING_HUMAN_RATIFICATION",
+  "date": "2026-10-06",
+  "parent_artifacts": [
+    "docs/tier1/TIER-1-RECONSTRUCTION-MANIFEST-001",
+    "docs/tier1/TIER-1-SOURCE-INTAKE-001.json",
+    "docs/tier1/TIER-1-MECHANISM-EXTRACTION-001.json",
+    "docs/tier1/TIER-1-BASELINE-COMPARISON-001.json",
+    "docs/tier1/TIER-1-DELTA-DECISION-001.json"
+  ],
+  "scope": "Exact reconstruction work packages for CEI-001, PROV-001, AUTH-001, AAL-001, and EVAL-001 using existing repository capability where established, with explicit build-missing surfaces. No implementation is authorized by this plan.",
+  "authority_boundary": "KSI remains external/final authority. EIL remains the existing epistemic-integrity dependency. This plan cannot create, transfer, or expand authority.",
+  "reuse_principle": "Reuse -> Adapt -> Wrap -> Build missing -> Verify.",
+  "implementation_gate": "NO NATIVE IMPLEMENTATION UNTIL THIS PLAN IS HUMAN-RATIFIED AND THE SHARED CONTRACT SET IS RECORDED.",
+  "shared_contracts": [
+    {
+      "id": "CONTRACT-001",
+      "name": "Capability Identity",
+      "fields": [
+        "capability_id",
+        "version",
+        "interface_hash",
+        "implementation_ref"
+      ]
+    },
+    {
+      "id": "CONTRACT-002",
+      "name": "Execution Context",
+      "fields": [
+        "actor",
+        "capability_id",
+        "action",
+        "resource",
+        "environment",
+        "authority_snapshot_ref",
+        "trajectory_ref"
+      ]
+    },
+    {
+      "id": "CONTRACT-003",
+      "name": "Evidence Reference",
+      "fields": [
+        "evidence_id",
+        "level",
+        "artifact_hash",
+        "source_ref",
+        "execution_ref",
+        "verification_ref",
+        "status"
+      ]
+    },
+    {
+      "id": "CONTRACT-004",
+      "name": "Authority Snapshot",
+      "fields": [
+        "delegation_id",
+        "authority_level",
+        "scope",
+        "issued_at",
+        "expires_at",
+        "revocation_ref",
+        "source_ref"
+      ],
+      "rule": "snapshot is consumed from KSI; caller cannot authoritatively set it"
+    },
+    {
+      "id": "CONTRACT-005",
+      "name": "Trajectory Event",
+      "fields": [
+        "event_id",
+        "sequence",
+        "timestamp",
+        "actor",
+        "action",
+        "resource",
+        "parameters_digest",
+        "authority_snapshot_ref",
+        "previous_event_ref",
+        "event_hash"
+      ]
+    },
+    {
+      "id": "CONTRACT-006",
+      "name": "Decision Result",
+      "fields": [
+        "decision",
+        "reason_codes",
+        "matched_policies",
+        "trajectory_hash",
+        "authority_snapshot",
+        "context_hash"
+      ],
+      "allowed": [
+        "ALLOW",
+        "DENY",
+        "ESCALATE",
+        "NOT_MEASURED"
+      ]
+    },
+    {
+      "id": "CONTRACT-007",
+      "name": "Provenance Record",
+      "fields": [
+        "capability_id",
+        "source",
+        "transformation",
+        "execution",
+        "result",
+        "attestation",
+        "evidence_refs"
+      ],
+      "rule": "verification is derived by verifier"
+    },
+    {
+      "id": "CONTRACT-008",
+      "name": "Evaluation Run",
+      "fields": [
+        "evaluation_id",
+        "target",
+        "task",
+        "dataset",
+        "solver",
+        "scorer",
+        "environment",
+        "repetitions",
+        "metrics",
+        "evidence_policy",
+        "run_provenance"
+      ]
+    },
+    {
+      "id": "CONTRACT-009",
+      "name": "Attack Campaign",
+      "fields": [
+        "campaign_id",
+        "dataset",
+        "technique",
+        "target",
+        "executor",
+        "trajectory",
+        "scorer",
+        "result",
+        "evidence_ref"
+      ]
+    },
+    {
+      "id": "CONTRACT-010",
+      "name": "Epistemic Transition",
+      "fields": [
+        "from_state",
+        "to_state",
+        "claim_ref",
+        "evidence_refs",
+        "verification_refs",
+        "qualification_ref"
+      ],
+      "rule": "all transitions pass through EIL controls"
+    }
+  ],
+  "work_packages": [
+    {
+      "id": "WP-01",
+      "capability": "PROV-001",
+      "phase": "FOUNDATION",
+      "decision": "ADAPT + BUILD MISSING + VERIFY",
+      "reuse": [
+        "MANIFEX BuildIndex",
+        "MANIFEX execution evidence and append-only evidence records",
+        "MANIFEX artifact/source identity records",
+        "Global-Intelligence provenance patterns as non-authoritative legacy input"
+      ],
+      "adapt": [
+        "Bind provenance records to exact repository revision/tree/material hash",
+        "Bind transformation inputs/outputs to execution identity",
+        "Map provenance verification outputs into E0-E5 without equating external assurance levels to KSI qualification"
+      ],
+      "build": [
+        "canonical provenance schema",
+        "deterministic canonicalization/hash procedure",
+        "independent provenance verifier",
+        "attestation/signature binding",
+        "source-checkout and commit-bound execution record",
+        "provenance-to-capability-registry linkage",
+        "verification result derived from artifacts/attestations rather than producer flags"
+      ],
+      "interfaces": [
+        "CONTRACT-001",
+        "CONTRACT-003",
+        "CONTRACT-007"
+      ],
+      "acceptance": [
+        "same canonical record reproduces identical hash",
+        "tampered source/material/product is rejected",
+        "mismatched attestation is rejected",
+        "caller-supplied verified=true cannot establish verification",
+        "independent verifier reaches same result from evidence package",
+        "provenance can be linked to a capability without granting authority"
+      ],
+      "evidence": [
+        "canonical record",
+        "hash manifest",
+        "execution record",
+        "attestation bundle",
+        "verifier output",
+        "independent reproduction"
+      ],
+      "target_evidence_level": "E3 minimum; E4 for independent verification claim",
+      "dependencies": [
+        "MANIFEX",
+        "EIL"
+      ]
+    },
+    {
+      "id": "WP-02",
+      "capability": "AUTH-001",
+      "phase": "AUTHORITY_INTERFACE",
+      "decision": "WRAP + ADAPT + VERIFY",
+      "reuse": [
+        "KSI H0-H3 authority model",
+        "existing policy/RBAC mechanisms as analyzable policy inputs",
+        "EIL authority/evidence separation"
+      ],
+      "adapt": [
+        "Expose KSI delegation state through read-only authoritative interface",
+        "evaluate policy against immutable authority snapshot",
+        "separate POLICY_ALLOW from AUTHORITY_CREATED"
+      ],
+      "build": [
+        "delegation snapshot adapter",
+        "expiry/revocation/stale snapshot handling",
+        "human-required high-impact gate",
+        "anti-forgery authority-state validation"
+      ],
+      "interfaces": [
+        "CONTRACT-002",
+        "CONTRACT-004",
+        "CONTRACT-006"
+      ],
+      "acceptance": [
+        "H0 cannot be delegated to machine",
+        "H3 action cannot exceed H2/H1/H0 boundaries",
+        "expired delegation denies or escalates",
+        "revoked delegation denies",
+        "caller-forged authority_level is ignored/rejected",
+        "caller-forged human_approved is ignored/rejected",
+        "policy conflict is deterministic",
+        "replayed authorization snapshot is rejected when stale"
+      ],
+      "evidence": [
+        "authority snapshot",
+        "policy input/output",
+        "negative authorization traces",
+        "revocation/expiry traces"
+      ],
+      "target_evidence_level": "E3 minimum; E4 for independent policy-boundary verification",
+      "dependencies": [
+        "KSI",
+        "EIL"
+      ]
+    },
+    {
+      "id": "WP-03",
+      "capability": "CEI-001",
+      "phase": "EXECUTION-INTEGRITY",
+      "decision": "ADAPT + BUILD MISSING + VERIFY",
+      "reuse": [
+        "Global-Intelligence execution/router/trajectory surfaces",
+        "KCN audit/session history",
+        "MANIFEX execution evidence",
+        "EIL transition control"
+      ],
+      "adapt": [
+        "Normalize existing event histories into immutable ordered trajectory events",
+        "bind each action to authority/context/resource state"
+      ],
+      "build": [
+        "trajectory store",
+        "sequence hash chain",
+        "contextual policy evaluator",
+        "deterministic replay",
+        "stale-context detection",
+        "sequence/loop/parameter escalation detection"
+      ],
+      "interfaces": [
+        "CONTRACT-002",
+        "CONTRACT-004",
+        "CONTRACT-005",
+        "CONTRACT-006"
+      ],
+      "acceptance": [
+        "individually permitted action can ALLOW",
+        "forbidden sequence DENYs despite individually permitted actions",
+        "benign intervention changes trajectory decision deterministically",
+        "reordered events are detected",
+        "loop/repetition policy is enforced",
+        "parameter escalation is detected",
+        "authority downgrade is detected",
+        "stale authority snapshot is detected",
+        "forged trajectory event is rejected",
+        "forged authorization result is rejected",
+        "valid trajectory replay reproduces decision",
+        "same inputs reproduce same decision"
+      ],
+      "evidence": [
+        "immutable trajectory",
+        "decision record",
+        "trajectory hash",
+        "replay result",
+        "negative/adversarial traces"
+      ],
+      "target_evidence_level": "E3 minimum; E4 for independent enforcement claim",
+      "dependencies": [
+        "AUTH-001",
+        "PROV-001",
+        "KSI",
+        "EIL",
+        "MANIFEX"
+      ]
+    },
+    {
+      "id": "WP-04",
+      "capability": "AAL-001",
+      "phase": "ADVERSARIAL_LAB",
+      "decision": "ADAPT + WRAP + BUILD MISSING",
+      "reuse": [
+        "Global-Intelligence security/adversarial modules",
+        "KCN Security Twin/audit infrastructure",
+        "cyber-defense repositories",
+        "MANIFEX execution/evidence substrate"
+      ],
+      "wrap": [
+        "existing agent runtimes",
+        "Security Twin as disposable test environment"
+      ],
+      "adapt": [
+        "normalize attack/target/scorer/campaign semantics",
+        "preserve complete trajectory and provenance for every campaign"
+      ],
+      "build": [
+        "campaign manifest",
+        "architecture-boundary attack suite",
+        "replayable executor",
+        "scorer correctness harness",
+        "evidence-integrity checks",
+        "coverage model"
+      ],
+      "interfaces": [
+        "CONTRACT-005",
+        "CONTRACT-007",
+        "CONTRACT-008",
+        "CONTRACT-009"
+      ],
+      "acceptance": [
+        "caller-forged verified=true",
+        "caller-forged human_approved=true",
+        "caller-forged authority_level=H2",
+        "caller-forged evidence_level=E3",
+        "caller-forged qualification=QUALIFIED",
+        "trajectory tampering",
+        "provenance substitution/replay",
+        "policy bypass",
+        "H2-to-H0 escalation",
+        "stale/replayed authorization",
+        "cross-capability state mutation"
+      ],
+      "evidence": [
+        "campaign manifest",
+        "raw trajectory",
+        "scorer result",
+        "attack reproduction",
+        "failure finding",
+        "provenance record"
+      ],
+      "target_evidence_level": "Evidence-defined; each claimed campaign result requires reproducible execution and preserved evidence",
+      "dependencies": [
+        "CEI-001",
+        "AUTH-001",
+        "PROV-001",
+        "EIL",
+        "MANIFEX"
+      ]
+    },
+    {
+      "id": "WP-05",
+      "capability": "EVAL-001",
+      "phase": "EVALUATION",
+      "decision": "ADAPT + WRAP + VERIFY",
+      "reuse": [
+        "KCN evaluation infrastructure",
+        "Global-Intelligence certification/evaluation",
+        "MANIFEX test/evidence registration",
+        "Inspect task/solver/scorer model",
+        "Promptfoo evaluation concepts"
+      ],
+      "wrap": [
+        "legacy evaluators/certification engines as targets or scorers, not truth sources"
+      ],
+      "adapt": [
+        "common task/solver/scorer semantics",
+        "run provenance",
+        "trajectory/evidence integration",
+        "E0-E5 evidence policy"
+      ],
+      "build": [
+        "common evaluation object",
+        "evaluator-correctness harness",
+        "known-good/known-bad/boundary/adversarial/reproduction suite",
+        "deterministic metric recording"
+      ],
+      "interfaces": [
+        "CONTRACT-003",
+        "CONTRACT-008",
+        "CONTRACT-009"
+      ],
+      "acceptance": [
+        "known-good target scores correctly",
+        "known-bad target is distinguished",
+        "boundary cases behave as specified",
+        "adversarial evaluator inputs do not corrupt scoring",
+        "same run reproduces metrics",
+        "scorer mutation is detected",
+        "target performance is separated from evaluator correctness",
+        "run provenance is complete",
+        "evaluation result enters EIL as evidence rather than authority"
+      ],
+      "evidence": [
+        "evaluation manifest",
+        "dataset identity",
+        "solver/scorer identity",
+        "run record",
+        "metrics",
+        "reproduction",
+        "evaluator-validation results"
+      ],
+      "target_evidence_level": "E3 minimum for reproducible evaluation claims",
+      "dependencies": [
+        "KCN",
+        "AAL-001",
+        "CEI-001",
+        "PROV-001",
+        "EIL"
+      ]
+    }
+  ],
+  "dependency_order": [
+    "WP-01 PROV-001 foundation",
+    "WP-02 AUTH-001 bounded KSI interface",
+    "WP-03 CEI-001 trajectory enforcement",
+    "WP-04 AAL-001 adversarial laboratory",
+    "WP-05 EVAL-001 common evaluation substrate",
+    "TEVV across all work packages",
+    "E0-E5 evidence packaging",
+    "independent verification",
+    "qualification decision"
+  ],
+  "reuse_map": [
+    {
+      "source": "MANIFEX",
+      "use": "PROV-001 evidence/provenance substrate; CEI execution evidence; AAL campaign evidence; EVAL run evidence"
+    },
+    {
+      "source": "Global-Intelligence",
+      "use": "legacy provenance, capability discovery, policy, agent execution, evaluation, security mechanisms as adaptation inputs"
+    },
+    {
+      "source": "KCN ecosystem",
+      "use": "intelligence/evaluation/audit/security-twin surfaces as bounded inputs"
+    },
+    {
+      "source": "KSI",
+      "use": "authoritative H0-H3 delegation and constitutional boundary only"
+    },
+    {
+      "source": "EIL",
+      "use": "epistemic transition control and claim/evidence/qualification separation only"
+    },
+    {
+      "source": "Quantara repositories",
+      "use": "domain-specific provenance/evaluation patterns only where technically applicable"
+    },
+    {
+      "source": "Worldview/Kronos/KCS",
+      "use": "integration/orchestration adapters only after capability-level inspection"
+    }
+  ],
+  "global_adversarial_contract": [
+    "Producer cannot self-certify verification.",
+    "Caller cannot self-authorize.",
+    "Policy engine cannot create authority.",
+    "Evidence cannot promote itself.",
+    "Qualification cannot promote itself.",
+    "One capability cannot silently mutate another capability's state.",
+    "Every failure becomes an evidence-backed finding before engineering change.",
+    "Legacy/historical measurements cannot be silently presented as current qualification."
+  ],
+  "evidence_plan": {
+    "per_work_package": [
+      "implementation identity",
+      "source reuse references",
+      "test manifest",
+      "execution record",
+      "artifact hashes",
+      "verification result",
+      "EIL transition record"
+    ],
+    "minimum_state_machine": "E0 claim -> E1 artifact -> E2 execution -> E3 reproduced verification -> E4 independent verification -> E5 cross-system/environment; NOT_MEASURED remains first-class",
+    "rule": "No work-package status is promoted merely because implementation exists."
+  },
+  "forbidden_actions_before_ratification": [
+    "Do not modify KSI authority state.",
+    "Do not replace or fork frozen EIL semantics.",
+    "Do not import external projects as if imported code equals reconstructed capability.",
+    "Do not mark verified=true based on caller input.",
+    "Do not mark human_approved=true based on caller input.",
+    "Do not assign E3/E4/E5 merely from test count.",
+    "Do not declare qualification from successful implementation.",
+    "Do not delete or rewrite historical evidence."
+  ],
+  "plan_status": {
+    "implementation": "NOT_AUTHORIZED_BY_PLAN",
+    "execution": "NOT_STARTED_BY_PLAN",
+    "verification": "NOT_STARTED_BY_PLAN",
+    "qualification": "NOT_STARTED_BY_PLAN",
+    "authority": "KSI EXTERNAL/FINAL"
+  },
+  "next_gate": "HUMAN_RATIFICATION_OF_RECONSTRUCTION_PLAN-001",
+  "post_ratification": "Create shared contracts only, then execute WP-01 through WP-05 in dependency order with a separate evidence/verification record for each."
+}
