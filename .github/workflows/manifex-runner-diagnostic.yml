@@ -1,0 +1,96 @@
+name: MANIFEX Runner Diagnostic
+
+on:
+  push:
+    branches: [manifex-genesis-runtime]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  runner-smoke-latest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Runner started
+        run: |
+          echo 'MANIFEX_RUNNER_STARTED'
+          echo "runner=${RUNNER_NAME}"
+          echo "os=${RUNNER_OS}"
+          echo "arch=${RUNNER_ARCH}"
+          echo "image=${ImageOS:-unknown}"
+      - name: Basic shell test
+        run: |
+          set -eux
+          printf 'MANIFEX_RUNNER_OK\n'
+          uname -a
+          command -v bash
+          command -v sh
+      - name: Python availability test
+        run: |
+          set -eux
+          python3 --version
+          python3 -c 'print("MANIFEX_PYTHON_OK")'
+      - name: Evidence
+        if: always()
+        run: |
+          {
+            echo 'MANIFEX runner diagnostic evidence'
+            echo "commit=${GITHUB_SHA}"
+            echo "run=${GITHUB_RUN_ID}"
+            echo "runner=${RUNNER_NAME}"
+            echo "os=${RUNNER_OS}"
+            echo "arch=${RUNNER_ARCH}"
+            uname -a || true
+            python3 --version || true
+          } > manifex-runner-diagnostic-latest.txt
+      - name: Upload diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: manifex-runner-diagnostic-latest
+          path: manifex-runner-diagnostic-latest.txt
+
+  runner-smoke-2204:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - name: Runner started
+        run: |
+          echo 'MANIFEX_RUNNER_STARTED'
+          echo "runner=${RUNNER_NAME}"
+          echo "os=${RUNNER_OS}"
+          echo "arch=${RUNNER_ARCH}"
+          echo "image=${ImageOS:-unknown}"
+      - name: Basic shell test
+        run: |
+          set -eux
+          printf 'MANIFEX_RUNNER_OK\n'
+          uname -a
+          command -v bash
+          command -v sh
+      - name: Python availability test
+        run: |
+          set -eux
+          python3 --version
+          python3 -c 'print("MANIFEX_PYTHON_OK")'
+      - name: Evidence
+        if: always()
+        run: |
+          {
+            echo 'MANIFEX runner diagnostic evidence'
+            echo "commit=${GITHUB_SHA}"
+            echo "run=${GITHUB_RUN_ID}"
+            echo "runner=${RUNNER_NAME}"
+            echo "os=${RUNNER_OS}"
+            echo "arch=${RUNNER_ARCH}"
+            uname -a || true
+            python3 --version || true
+          } > manifex-runner-diagnostic-2204.txt
+      - name: Upload diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: manifex-runner-diagnostic-2204
+          path: manifex-runner-diagnostic-2204.txt
