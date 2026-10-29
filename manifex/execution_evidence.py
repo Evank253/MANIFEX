@@ -1,11 +1,12 @@
-"""First-class MANIFEX storage and integrity validation for Kronos execution evidence.
+"""First-class MANIFEX storage and integrity validation for execution evidence.
 
-Registration preserves execution facts; it never qualifies evidence or grants authority.
+Registration records facts only. It never grants authority or qualification.
 """
 from __future__ import annotations
 
 import hashlib
 import json
+import re
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Mapping, Optional
@@ -17,20 +18,20 @@ HASH_FIELDS = ("request_hash", "result_hash", "evidence_hash")
 REQUIRED = (
     "evidence_id", "execution_id", "request_id", "mission_id",
     "repository", "target_commit", "provider", "phase", "command",
-    "status", "execution_started", "qualification_status",
-    *HASH_FIELDS,
+    "status", "execution_started", "qualification_status", *HASH_FIELDS,
 )
 FIRST_CLASS_FIELDS = (
-    "evidence_id", "execution_id", "request_id", "mission_id", "repository", "target_commit",
-    "provider", "provider_run_id", "phase", "command", "status",
+    "evidence_id", "execution_id", "request_id", "mission_id", "repository",
+    "target_commit", "provider", "provider_run_id", "phase", "command", "status",
     "execution_started", "exit_code", "failure_class", "environment",
-    "started_at", "finished_at", "request_hash", "result_hash",
-    "evidence_hash", "qualification_status",
+    "started_at", "finished_at", "request_payload", "result_payload",
+    "request_hash", "result_hash", "evidence_hash", "qualification_status",
 )
+_SAFE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 
 
 class ExecutionRegistrationError(ValueError):
-    pass
+    """Raised when an execution evidence packet is incomplete or invalid."""
 
 
 @dataclass
@@ -50,6 +51,8 @@ class ExecutionEvidenceRecord:
     request_hash: str
     result_hash: str
     evidence_hash: str
+    request_payload: Mapping[str, Any]
+    result_payload: Mapping[str, Any]
     provider_run_id: Optional[str] = None
     exit_code: Optional[int] = None
     failure_class: Optional[str] = None
@@ -59,21 +62,20 @@ class ExecutionEvidenceRecord:
 
 
 def canonical_hash(value: Any) -> str:
-    payload = json.dumps(value, sort_keys=True, separators=(",", ":"), default=str).encode()
+    payload = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
     return hashlib.sha256(payload).hexdigest()
 
 
-def _hash_matches(value: str, expected: Any) -> bool:
-    return value == canonical_hash(expected)
+def _is_sha256(value: Any) -> bool:
+    return isinstance(value, str) and re.fullmatch(r"[0-9a-fA-F]{64}", value) is not None
 
 
 def _expected_evidence_hash(evidence: Mapping[str, Any]) -> str:
-    hash_input = {k: v for k, v in evidence.items() if k != "evidence_hash"}
-    return canonical_hash(hash_input)
+    return canonical_hash({k: v for k, v in evidence.items() if k != "evidence_hash"})
 
 
 def validate_packet(packet: Mapping[str, Any]) -> Mapping[str, Any]:
-    if packet.get("schema") != SCHEMA:
+    if not isinstance(packet, Mapping) or packet.get("schema") != SCHEMA:
         raise ExecutionRegistrationError("unsupported evidence schema")
     evidence = packet.get("evidence")
     if not isinstance(evidence, Mapping):
@@ -87,26 +89,38 @@ def validate_packet(packet: Mapping[str, Any]) -> Mapping[str, Any]:
         raise ExecutionRegistrationError("qualification request must be false")
     if packet.get("authority_decision_requested") is not False:
         raise ExecutionRegistrationError("authority decision must be false")
+
     for name in HASH_FIELDS:
-        value = evidence[name]
-        if not isinstance(value, str) or len(value) != 64:
-            raise ExecutionRegistrationError(f"{name} must be SHA-256")
-        try:
-            int(value, 16)
-        except ValueError as exc:
-            raise ExecutionRegistrationError(f"{name} must be hexadecimal") from exc
-    if not evidence["target_commit"]:
-        raise ExecutionRegistrationError("target commit is required")
+        if not _is_sha256(evidence[name]):
+            raise ExecutionRegistrationError(f"{name} must be a 64-character SHA-256 hex digest")
 
-    request_payload = evidence.get("request_payload")
-    result_payload = evidence.get("result_payload")
-    if request_payload is not None and not _hash_matches(evidence["request_hash"], request_payload):
+    for name in ("evidence_id", "execution_id", "request_id", "mission_id", "repository",
+                 "target_commit", "provider", "phase", "status"):
+        if not isinstance(evidence.get(name), str) or not evidence[name].strip():
+            raise ExecutionRegistrationError(f"{name} must be a non-empty string")
+    if not _SAFE_ID.fullmatch(evidence["execution_id"]):
+        raise ExecutionRegistrationError("execution_id must be a safe single path component")
+    if not isinstance(evidence.get("command"), list) or not evidence["command"] or not all(
+        isinstance(part, str) and part for part in evidence["command"]
+    ):
+        raise ExecutionRegistrationError("command must be a non-empty list of non-empty strings")
+    if not isinstance(evidence.get("execution_started"), bool):
+        raise ExecutionRegistrationError("execution_started must be a boolean")
+    if "exit_code" in evidence and evidence["exit_code"] is not None and (
+        isinstance(evidence["exit_code"], bool) or not isinstance(evidence["exit_code"], int)
+    ):
+        raise ExecutionRegistrationError("exit_code must be an integer or null")
+    if "environment" in evidence and not isinstance(evidence["environment"], Mapping):
+        raise ExecutionRegistrationError("environment must be an object")
+    if not isinstance(evidence.get("request_payload"), Mapping):
+        raise ExecutionRegistrationError("request_payload object is required")
+    if not isinstance(evidence.get("result_payload"), Mapping):
+        raise ExecutionRegistrationError("result_payload object is required")
+    if canonical_hash(evidence["request_payload"]) != evidence["request_hash"]:
         raise ExecutionRegistrationError("request hash does not match request payload")
-    if result_payload is not None and not _hash_matches(evidence["result_hash"], result_payload):
+    if canonical_hash(evidence["result_payload"]) != evidence["result_hash"]:
         raise ExecutionRegistrationError("result hash does not match result payload")
-
-    expected_evidence = _expected_evidence_hash(evidence)
-    if evidence["evidence_hash"] != expected_evidence:
+    if evidence["evidence_hash"] != _expected_evidence_hash(evidence):
         raise ExecutionRegistrationError("evidence hash does not match evidence payload")
     return evidence
 
@@ -115,35 +129,37 @@ def _record_from_evidence(evidence: Mapping[str, Any]) -> ExecutionEvidenceRecor
     return ExecutionEvidenceRecord(**{
         name: evidence.get(name)
         for name in FIRST_CLASS_FIELDS
-        if name in evidence
     })
 
 
 def register_execution_evidence(packet: Mapping[str, Any], root: Path) -> AssetRecord:
-    """Validate and register execution evidence as a discovered MANIFEX asset."""
+    """Validate and register evidence as DISCOVERED; never qualify or authorize it."""
     evidence = validate_packet(packet)
     evidence_record = _record_from_evidence(evidence)
+    root = Path(root).resolve()
     evidence_root = root / "execution_evidence"
     evidence_root.mkdir(parents=True, exist_ok=True)
     evidence_path = evidence_root / f"{evidence_record.execution_id}.json"
-    if evidence_path.exists():
+
+    # Exclusive create prevents overwrites and closes the simple duplicate-ID race.
+    try:
+        with evidence_path.open("x", encoding="utf-8") as fh:
+            json.dump(asdict(evidence_record), fh, sort_keys=True, indent=2)
+            fh.write("\n")
+            fh.flush()
+    except FileExistsError as exc:
         raise ExecutionRegistrationError(
             f"execution evidence already registered: {evidence_record.execution_id}"
-        )
-    evidence_path.write_text(
-        json.dumps(asdict(evidence_record), sort_keys=True, indent=2) + "\n",
-        encoding="utf-8",
-    )
+        ) from exc
 
     index = BuildIndex(root)
     asset_id = index.asset_id(
-        evidence_record.repository,
-        evidence_record.target_commit,
+        evidence_record.repository, evidence_record.target_commit,
         "execution/" + evidence_record.evidence_id,
     )
     record = AssetRecord(
         asset_id=asset_id,
-        name=f"Kronos execution {evidence_record.execution_id}",
+        name=f"Execution {evidence_record.execution_id}",
         source_repository=evidence_record.repository,
         source_commit=evidence_record.target_commit,
         source_path="execution/" + evidence_record.evidence_id,
@@ -156,18 +172,20 @@ def register_execution_evidence(packet: Mapping[str, Any], root: Path) -> AssetR
         notes=f"First-class evidence: {evidence_path}",
     )
     try:
-        result = index.add(record)
+        index.add(record)
+        with (root / "execution_evidence_ledger.jsonl").open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps({
+                "event": "EXECUTION_EVIDENCE_REGISTERED",
+                "evidence_id": evidence_record.evidence_id,
+                "execution_id": evidence_record.execution_id,
+                "request_id": evidence_record.request_id,
+                "mission_id": evidence_record.mission_id,
+                "target_commit": evidence_record.target_commit,
+                "evidence_hash": evidence_record.evidence_hash,
+            }, sort_keys=True) + "\n")
     except Exception:
+        # Best-effort compensation. The independent ledgers still need a durable
+        # transaction/recovery design for crash consistency and concurrent writers.
         evidence_path.unlink(missing_ok=True)
         raise
-    with (root / "execution_evidence_ledger.jsonl").open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps({
-            "event": "EXECUTION_EVIDENCE_REGISTERED",
-            "evidence_id": evidence_record.evidence_id,
-            "execution_id": evidence_record.execution_id,
-            "request_id": evidence_record.request_id,
-            "mission_id": evidence_record.mission_id,
-            "target_commit": evidence_record.target_commit,
-            "evidence_hash": evidence_record.evidence_hash,
-        }, sort_keys=True) + "\n")
-    return result
+    return record

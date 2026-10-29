@@ -20,6 +20,7 @@ This is intentionally dependency-free so it can run inside the MANIFEX working c
 from __future__ import annotations
 
 import argparse
+import fcntl
 import hashlib
 import json
 import time
@@ -133,21 +134,51 @@ class BuildIndex:
         with self.ledger_path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(event, sort_keys=True) + "\n")
 
+    def _locked(self):
+        """Cross-process lock for compound index/ledger mutations on POSIX."""
+        lock_path = self.root / ".build_index.lock"
+        fh = lock_path.open("a+", encoding="utf-8")
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        return fh
+
+    @staticmethod
+    def _size(path: Path) -> int:
+        return path.stat().st_size if path.exists() else 0
+
+    @staticmethod
+    def _rollback(path: Path, size: int) -> None:
+        if path.exists():
+            with path.open("r+b") as fh:
+                fh.truncate(size)
+                fh.flush()
+
     def add(self, record: AssetRecord) -> AssetRecord:
         record.validate()
-        records = self._read_records()
-        if record.asset_id in records:
-            raise ValueError(f"asset already indexed: {record.asset_id}")
-        self._append_index(record)
-        self._append_event({
-            "event": "ASSET_DISCOVERED",
-            "asset_id": record.asset_id,
-            "source_repository": record.source_repository,
-            "source_commit": record.source_commit,
-            "source_path": record.source_path,
-            "state": record.state,
-        })
-        return record
+        lock = self._locked()
+        try:
+            records = self._read_records()
+            if record.asset_id in records:
+                raise ValueError(f"asset already indexed: {record.asset_id}")
+            index_size = self._size(self.index_path)
+            ledger_size = self._size(self.ledger_path)
+            try:
+                self._append_index(record)
+                self._append_event({
+                    "event": "ASSET_DISCOVERED",
+                    "asset_id": record.asset_id,
+                    "source_repository": record.source_repository,
+                    "source_commit": record.source_commit,
+                    "source_path": record.source_path,
+                    "state": record.state,
+                })
+            except Exception:
+                self._rollback(self.index_path, index_size)
+                self._rollback(self.ledger_path, ledger_size)
+                raise
+            return record
+        finally:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+            lock.close()
 
     def get(self, asset_id: str) -> Optional[AssetRecord]:
         return self._read_records().get(asset_id)
@@ -166,6 +197,11 @@ class BuildIndex:
             raise ValueError(f"invalid transition: {record.state} -> {new_state}")
         if evidence_level is not None and evidence_level not in EVIDENCE_LEVELS:
             raise ValueError(f"invalid evidence level: {evidence_level}")
+        if new_state == "QUALIFIED":
+            # A caller-provided status string is not qualification evidence.
+            # This registry has no trusted qualification authority/proof verifier,
+            # so generic transitions must fail closed at this boundary.
+            raise ValueError("QUALIFIED requires a trusted qualification service; BuildIndex cannot self-qualify")
 
         updated = AssetRecord(**asdict(record))
         updated.state = new_state
